@@ -1,0 +1,8 @@
+# data pelanggan jangan ikut ke repo publik
+uploads/referensi/*
+!uploads/referensi/.gitkeep
+
+.DS_Store
+Thumbs.db
+*.log
+.vscode/

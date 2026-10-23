@@ -1,0 +1,130 @@
+/* Yynnails Admin — satu file CSS untuk semua halaman admin (soft pink).
+   Ganti warna cukup lewat variabel di :root.
+   Tiap halaman punya class di <body>: pg-login, pg-dashboard, pg-galeri, pg-form. */
+
+*{box-sizing:border-box}
+:root{
+  --bg:#fff5f8;        /* latar halaman */
+  --card:#ffffff;      /* kartu / panel */
+  --ink:#4a2f3a;       /* teks utama */
+  --mut:#8a6b77;       /* teks redup */
+  --head:#c25b7a;      /* judul & link */
+  --line:#f1c9d5;      /* garis / border */
+  --soft:#ffe6ee;      /* latar lembut (hover, header tabel) */
+  --chip:#ffe3ee;--chip-ink:#a64d78;
+  --btn:#f6b3c6;--btn-h:#f19db6;--btn-ink:#4a2233;
+  --danger:#c9455f;
+  --ok-bg:#e8f5e9;--ok-ink:#216e39;--ok-line:#b7dfbd;
+  --err-bg:#ffe3e8;--err-ink:#a52a47;
+  --sans:Poppins,Arial,sans-serif;
+}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg)}
+h1{margin:0 0 8px;color:var(--head)}
+p{color:var(--mut)}
+a{color:var(--head);text-decoration:none}
+.muted{color:var(--mut);font-size:14px}
+.empty{text-align:center;color:var(--mut)}
+
+/* ---------- komponen bersama ---------- */
+.button{display:inline-block;padding:12px 16px;border:0;border-radius:9px;background:var(--btn);color:var(--btn-ink);font-weight:bold;text-decoration:none;cursor:pointer}
+.button:hover{background:var(--btn-h)}
+.button.soft{background:var(--chip);color:var(--chip-ink)}
+.button.danger{background:var(--danger);color:#fff}
+.button.block{display:block;width:100%;text-align:center;margin-top:12px}
+.back{display:inline-block;margin-bottom:20px;color:var(--head)}
+.notice-ok{background:var(--ok-bg);color:var(--ok-ink);padding:14px 18px;border-radius:10px;margin:20px 0;border:1px solid var(--ok-line)}
+.chip{display:inline-block;padding:6px 9px;border-radius:20px;background:var(--chip);color:var(--chip-ink);font-size:12px}
+
+/* ---------- LOGIN ---------- */
+.pg-login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#fff5f8,#ffdce7,#fff5f8)}
+.pg-login .login-card{width:100%;max-width:400px;padding:32px;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:0 20px 60px rgba(212,112,140,.18)}
+.pg-login .logo{display:flex;justify-content:center;align-items:center;margin-bottom:12px}
+.pg-login .logo img{display:block;width:80px;height:80px;object-fit:contain}
+.pg-login h1{text-align:center;font-size:25px;color:var(--ink)}
+.pg-login .subtitle{text-align:center;color:var(--mut);margin-bottom:28px;font-size:14px}
+.pg-login label{display:block;margin:16px 0 8px;font-size:14px}
+.pg-login input{width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:#fff;outline:none;font:inherit}
+.pg-login input:focus{border-color:var(--head)}
+.pg-login .password-wrap{position:relative}
+.pg-login .password-wrap input{padding-right:48px}
+.pg-login .toggle-password{position:absolute;top:50%;right:5px;transform:translateY(-50%);width:40px;height:40px;padding:0;margin:0;border:none;border-radius:8px;background:transparent;color:var(--head);cursor:pointer;font-size:19px}
+.pg-login .submit-btn{width:100%;margin-top:24px;padding:14px;border:0;border-radius:10px;background:var(--btn);color:var(--btn-ink);font-weight:bold;cursor:pointer}
+.pg-login .submit-btn:hover{background:var(--btn-h)}
+.pg-login .error{margin-top:18px;padding:12px;border-radius:8px;background:var(--err-bg);color:var(--err-ink);font-size:13px;line-height:1.5}
+.pg-login .back{display:block;text-align:center;margin:22px 0 0;font-size:13px}
+
+/* ---------- DASHBOARD ---------- */
+.pg-dashboard .layout{display:flex;min-height:100vh}
+.pg-dashboard .sidebar{width:235px;padding:28px 18px;background:var(--card);border-right:1px solid var(--line)}
+.pg-dashboard .brand{display:flex;align-items:center;gap:12px;margin:0 0 35px;color:var(--head);font-size:23px;font-weight:bold;line-height:1.2}
+.pg-dashboard .brand img{display:block;width:44px;height:44px;object-fit:contain;flex-shrink:0}
+.pg-dashboard .nav a{display:block;margin:8px 0;padding:13px;border-radius:9px;color:var(--ink)}
+.pg-dashboard .nav a.active,.pg-dashboard .nav a:hover{background:var(--soft);color:var(--head)}
+.pg-dashboard .main{flex:1;min-width:0;padding:32px}
+.pg-dashboard .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
+.pg-dashboard h1{font-size:28px;color:var(--ink)}
+.pg-dashboard .logout{display:inline-block;padding:11px 15px;border:1px solid var(--line);border-radius:9px;color:var(--head)}
+.pg-dashboard .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}
+.pg-dashboard .card{padding:22px;border:1px solid var(--line);border-radius:15px;background:var(--card)}
+.pg-dashboard .card p{margin:0 0 14px;color:var(--mut);font-size:13px}
+.pg-dashboard .number{font-size:30px;font-weight:bold;color:var(--head)}
+.pg-dashboard .panel{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--card)}
+.pg-dashboard .panel-head{padding:20px;border-bottom:1px solid var(--line)}
+.pg-dashboard .panel-head h2{margin:0;font-size:18px}
+.pg-dashboard .table-wrap{overflow-x:auto}
+.pg-dashboard table{width:100%;border-collapse:collapse;white-space:nowrap}
+.pg-dashboard th,.pg-dashboard td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+.pg-dashboard th{color:var(--head);background:var(--soft)}
+.pg-dashboard .empty{padding:30px}
+.pg-dashboard .status{display:inline-block;padding:6px 9px;border-radius:20px;background:var(--chip);color:var(--chip-ink);font-size:12px}
+.pg-dashboard .inline-form{display:inline-block;margin-bottom:6px}
+.pg-dashboard button{padding:8px 10px;border:0;border-radius:7px;background:var(--btn);color:var(--btn-ink);font-weight:bold;cursor:pointer}
+.pg-dashboard button:hover{background:var(--btn-h)}
+@media(max-width:900px){
+  .pg-dashboard .cards{grid-template-columns:repeat(2,1fr)}
+  .pg-dashboard .main{padding:22px}
+}
+@media(max-width:600px){
+  .pg-dashboard .layout{display:block}
+  .pg-dashboard .sidebar{width:100%;padding:18px}
+  .pg-dashboard .brand{margin-bottom:15px}
+  .pg-dashboard .nav{display:flex;flex-wrap:wrap;gap:5px}
+  .pg-dashboard .nav a{margin:0}
+  .pg-dashboard .topbar{align-items:flex-start;flex-direction:column}
+  .pg-dashboard .cards{grid-template-columns:1fr 1fr;gap:10px}
+  .pg-dashboard .card{padding:15px}
+  .pg-dashboard .number{font-size:25px}
+  .pg-dashboard .main{padding:16px}
+}
+
+/* ---------- GALERI (daftar karya) ---------- */
+.pg-galeri{padding:30px}
+.pg-galeri .container{max-width:1100px;margin:auto}
+.pg-galeri .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:25px}
+.pg-galeri .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.pg-galeri .card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.pg-galeri .card img{display:block;width:100%;height:220px;object-fit:cover;background:var(--soft)}
+.pg-galeri .card-body{padding:16px}
+.pg-galeri .card h2{margin:0 0 8px;font-size:18px}
+.pg-galeri .category{display:inline-block;padding:6px 9px;border-radius:20px;background:var(--chip);color:var(--chip-ink);font-size:12px}
+.pg-galeri .description{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.pg-galeri .empty{padding:40px 20px;border:1px dashed var(--line);border-radius:14px}
+@media(max-width:800px){.pg-galeri .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.pg-galeri{padding:18px}.pg-galeri .grid{grid-template-columns:1fr}}
+
+/* ---------- FORM (tambah & edit karya) ---------- */
+.pg-form{padding:25px}
+.pg-form .container{max-width:650px;margin:auto}
+.pg-form .box,.pg-form form,.pg-form .notice{margin-top:22px;padding:25px;border:1px solid var(--line);border-radius:15px;background:var(--card)}
+.pg-form .box{margin-top:0}
+.pg-form .box form{margin:0;padding:0;border:0;background:none}
+.pg-form p{line-height:1.6}
+.pg-form label{display:block;margin:18px 0 8px}
+.pg-form label.check-row{display:flex;align-items:center;gap:10px}
+.pg-form input:not([type=checkbox]):not([type=hidden]),.pg-form select,.pg-form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit}
+.pg-form input:focus,.pg-form select:focus,.pg-form textarea:focus{outline:0;border-color:var(--head)}
+.pg-form textarea{min-height:100px;resize:vertical}
+.pg-form small,.pg-form .hint{color:var(--mut);font-size:13px;line-height:1.5}
+.pg-form .preview{width:100%;max-height:300px;object-fit:cover;border-radius:10px;margin-top:10px}
+.pg-form .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.pg-form form>button.button{margin-top:22px}
