@@ -36,6 +36,10 @@ yynnails-webb/
 ├── pages/          booking_berhasil.php
 ├── actions/        proses_booking.php  (memproses form booking)
 ├── admin/          login, dashboard, kelola galeri, ubah password
+│   ├── includes/   lib.php, header.php, navbar.php, footer.php
+│   ├── data/       content.php  (judul halaman, menu, kategori)
+│   ├── pages/      isi halaman admin (tampilan)
+│   └── actions/    proses simpan / ubah / hapus / status booking
 └── uploads/
     ├── galeri/     foto karya (diupload admin)
     └── referensi/  foto referensi desain dari pelanggan
@@ -46,19 +50,18 @@ yynnails-webb/
 1. Install **XAMPP** (PHP 8.x), lalu jalankan **Apache** dan **MySQL** di XAMPP Control Panel.
 2. Salin/ekstrak folder `yynnails-webb` ke `C:\xampp\htdocs\`.
 3. Buka **http://localhost/phpmyadmin** → tab **Import** → pilih file `database/yynnails.sql` → **Go**.
-   (File ini otomatis membuat database `yynnails`. Jika ingin import ulang, hapus dulu database `yynnails`.)
+      (File ini otomatis membuat database `yynnails`. Jika database `yynnails` sudah ada, isinya akan dihapus dan dibuat ulang, jadi aman di-import berulang kali.)
 4. Cek koneksi database di `config/database.php` (default XAMPP: host `localhost`, user `root`, password kosong).
 5. Pastikan folder `uploads/referensi/` dan `uploads/galeri/` bisa ditulis.
 6. Buka di browser:
    - Website: **http://localhost/yynnails-webb/**
    - Admin: **http://localhost/yynnails-webb/admin/login.php**
 
-### Akun Admin
+### Akun Admin (demo)
 
 - Username: `admin`
-- Password: $2y$10$eRp/4yXpFx9UdY7ooTwffuACcZnYIsL/lGyck8SQMuRGefu62Am0S (tersimpan dalam bentuk hash bcrypt)
-- Ganti password lewat `admin/ubah_password.php` (minimal 12 karakter).
-
+- Password: `AdminDemo2026!`
+- Password ini hanya untuk demo/pengecekan tugas. Ganti lewat `admin/ubah_password.php` (minimal 12 karakter).
 ## Skema Database
 
 Tabel: `admin`, `galeri`, `jadwal`, `layanan`, `pelanggan`, `pesanan`.

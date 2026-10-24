@@ -18,9 +18,12 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Buat & pilih database (aman di-import berulang kali)
+-- Buat & pilih database
+-- Catatan: database `yynnails` yang sudah ada akan dihapus lalu dibuat ulang,
+-- jadi file ini aman di-import berulang kali.
 --
-CREATE DATABASE IF NOT EXISTS `yynnails` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+DROP DATABASE IF EXISTS `yynnails`;
+CREATE DATABASE `yynnails` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `yynnails`;
 
 
@@ -43,8 +46,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id_admin`, `username`, `password`, `nama`, `created_at`) VALUES
-(1, 'admin', '$2y$10$eRp/4yXpFx9UdY7ooTwffuACcZnYIsL/lGyck8SQMuRGefu62Am0S', 'mulkia', '2026-10-08 01:34:40');
-
+(1, 'admin', '$2y$10$kDw6rCma4xz0syiHX4KtV.Wdct5LkBH4qt7/rD19e8aZYR821ngpS', 'mulkia', '2026-10-08 01:34:40');
 -- --------------------------------------------------------
 
 --
@@ -121,8 +123,7 @@ CREATE TABLE `pelanggan` (
 --
 
 INSERT INTO `pelanggan` (`id_pelanggan`, `nama`, `no_whatsapp`, `created_at`, `updated_at`) VALUES
-(1, 'yuyun', '085825280212', '2026-10-14 17:34:11', '2026-10-19 05:51:25');
-
+(1, 'Pelanggan Contoh', '081234567890', '2026-10-14 17:34:11', '2026-10-19 05:51:25');
 -- --------------------------------------------------------
 
 --
@@ -147,14 +148,13 @@ CREATE TABLE `pesanan` (
 --
 
 INSERT INTO `pesanan` (`id_pesanan`, `id_pelanggan`, `kode_booking`, `layanan`, `tanggal`, `jam`, `referensi_design`, `catatan`, `status`, `created_at`) VALUES
-(1, 1, 'YN20261015-4AAD20', 'Nail Art', '2026-10-17', '13:00:00', 'ca613a36921caf7fb6176dcf0dcf0ab7.jpg', 'buat yang bagus kak', 'Dikonfirmasi', '2026-10-14 17:34:11'),
+(1, 1, 'YN20261015-4AAD20', 'Nail Art', '2026-10-17', '13:00:00', '', 'buat yang bagus kak', 'Dikonfirmasi', '2026-10-14 17:34:11'),
 (2, 1, 'YN20261015-1C3821', 'Nail Art', '2026-10-30', '15:00:00', '', 'seesuiiin aja kk', 'Ditolak', '2026-10-14 22:32:30'),
-(3, 1, 'YN20261015-98916E', 'Press-on Nails', '2026-11-13', '16:00:00', '7f00f48d1c1559f2521e59db84851132.jpg', 'ini kk', 'Dikonfirmasi', '2026-10-14 23:53:45'),
-(4, 1, 'YN20261015-D43947', 'Extensions', '2026-12-12', '16:00:00', '1da129ff6ba361c77526f82b81870b3d.jpg', '', 'Menunggu Konfirmasi', '2026-10-15 00:35:53'),
-(5, 1, 'YN20261015-96A2EC', 'Manicure', '2026-12-12', '11:00:00', '1d8ebc579faaa53ec9514c7f18404802.jpg', '', 'Ditolak', '2026-10-15 00:50:38'),
+(3, 1, 'YN20261015-98916E', 'Press-on Nails', '2026-11-13', '16:00:00', '', 'ini kk', 'Dikonfirmasi', '2026-10-14 23:53:45'),
+(4, 1, 'YN20261015-D43947', 'Extensions', '2026-12-12', '16:00:00', '', '', 'Menunggu Konfirmasi', '2026-10-15 00:35:53'),
+(5, 1, 'YN20261015-96A2EC', 'Manicure', '2026-12-12', '11:00:00', '', '', 'Ditolak', '2026-10-15 00:50:38'),
 (6, 1, 'YN20261017-C2A446', 'Manicure', '2026-12-24', '16:00:00', '', '', 'Menunggu Konfirmasi', '2026-10-16 23:19:10'),
 (7, 1, 'YN20261019-B4DB40', 'Press-on Nails', '2026-10-19', '14:00:00', '', '', 'Dikonfirmasi', '2026-10-19 05:51:25');
-
 --
 -- Indexes for dumped tables
 --
