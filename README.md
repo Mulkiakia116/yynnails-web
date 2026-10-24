@@ -16,12 +16,12 @@ Admin dapat login, mengelola status pesanan, dan mengelola galeri karya.
 | Database | MariaDB 10.4 / MySQL (via phpMyAdmin) |
 | Frontend | HTML, CSS, JavaScript (vanilla) |
 | Font & ikon | Google Fonts (Poppins, Playfair Display, Great Vibes), Font Awesome (CDN) |
-| Server lokal | XAMPP (Apache + MySQL) |
+| Server lokal |XAMPP atau Laragon (Apache + MySQL) |
 
 ## Struktur Folder
 
 ```
-yynnails-webb/
+yynnails-web/
 ├── index.php, about.php, services.php,      # titik masuk halaman publik (tipis,
 │   pricelist.php, gallery.php,              #   hanya memanggil render_page())
 │   contact.php, booking.php, status.php
@@ -45,23 +45,40 @@ yynnails-webb/
     └── referensi/  foto referensi desain dari pelanggan
 ```
 
-## Cara Menjalankan di Lokal (XAMPP)
+## Cara Menjalankan di Lokal
+
+Nama folder di bawah memakai `yynnails-web`. Jika folder bernama lain (misalnya hasil `git clone` bernama `yynnails-webb`), sesuaikan nama folder pada alamat URL.
+
+### Opsi A: Laragon
+
+1. Jalankan **Laragon** lalu klik **Start All** (Apache + MySQL).
+2. Salin/ekstrak folder `yynnails-web` ke `C:\laragon\www\`.
+3. Buka **phpMyAdmin** (Laragon: klik kanan > MySQL > phpMyAdmin) atau HeidiSQL, lalu **Import** file `database/yynnails.sql`.
+      (File ini otomatis membuat database `yynnails`. Jika database `yynnails` sudah ada, isinya akan dihapus dan dibuat ulang, jadi aman di-import berulang kali.)
+4. Cek koneksi database di `config/database.php` (default Laragon: host `localhost`, user `root`, password kosong).
+5. Pastikan folder `uploads/referensi/` dan `uploads/galeri/` bisa ditulis.
+6. Buka di browser:
+   - Website: **http://localhost/yynnails-web/** (atau **http://yynnails-web.test/**)
+   - Admin: **http://localhost/yynnails-web/admin/login.php**
+
+### Opsi B: XAMPP
 
 1. Install **XAMPP** (PHP 8.x), lalu jalankan **Apache** dan **MySQL** di XAMPP Control Panel.
-2. Salin/ekstrak folder `yynnails-webb` ke `C:\xampp\htdocs\`.
+2. Salin/ekstrak folder `yynnails-web` ke `C:\xampp\htdocs\`.
 3. Buka **http://localhost/phpmyadmin** → tab **Import** → pilih file `database/yynnails.sql` → **Go**.
-      (File ini otomatis membuat database `yynnails`. Jika database `yynnails` sudah ada, isinya akan dihapus dan dibuat ulang, jadi aman di-import berulang kali.)
+      (File ini otomatis membuat database `yynnails`.)
 4. Cek koneksi database di `config/database.php` (default XAMPP: host `localhost`, user `root`, password kosong).
 5. Pastikan folder `uploads/referensi/` dan `uploads/galeri/` bisa ditulis.
 6. Buka di browser:
-   - Website: **http://localhost/yynnails-webb/**
-   - Admin: **http://localhost/yynnails-webb/admin/login.php**
+   - Website: **http://localhost/yynnails-web/**
+   - Admin: **http://localhost/yynnails-web/admin/login.php**
 
 ### Akun Admin (demo)
 
 - Username: `admin`
 - Password: `AdminDemo2026!`
 - Password ini hanya untuk demo/pengecekan tugas. Ganti lewat `admin/ubah_password.php` (minimal 12 karakter).
+
 ## Skema Database
 
 Tabel: `admin`, `galeri`, `jadwal`, `layanan`, `pelanggan`, `pesanan`.
