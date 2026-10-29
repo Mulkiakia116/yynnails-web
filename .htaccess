@@ -1,0 +1,20 @@
+# Pengaturan keamanan dasar (Apache: XAMPP / Laragon / hosting cPanel)
+
+# Daftar isi folder tidak boleh terlihat
+Options -Indexes
+
+# Sembunyikan error PHP dari pengunjung (error tetap masuk log server)
+<IfModule mod_php.c>
+    php_flag display_errors Off
+</IfModule>
+
+# File sensitif tidak boleh diunduh lewat browser
+<FilesMatch "\.(sql|md|log|bak|ini)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

@@ -1,6 +1,7 @@
 
 <?php
-session_start();
+require __DIR__ . '/../includes/session.php';
+mulai_session();
 
 if (!isset($_SESSION['booking_berhasil'])) {
     header('Location: ../booking.php');

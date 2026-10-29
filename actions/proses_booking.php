@@ -1,6 +1,6 @@
-
 <?php
-session_start();
+require __DIR__ . '/../includes/session.php';
+mulai_session();
 
 require __DIR__ . '/../config/database.php';
 
@@ -9,9 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Anti-spam: kolom jebakan 'website' harus kosong (manusia tidak melihatnya)
+if (trim($_POST['website'] ?? '') !== '') {
+    exit('Booking tidak dapat diproses.');
+}
+
 $nama = trim($_POST['name'] ?? '');
 $wa = trim($_POST['phone'] ?? '');
-$email = trim($_POST['email'] ?? '');
 $layanan = trim($_POST['service'] ?? '');
 $tanggal = trim($_POST['date'] ?? '');
 $jam = trim($_POST['time'] ?? '');
@@ -54,7 +58,6 @@ $layananDiizinkan = [
     'Press-on Nails',
     'Nail Tip',
     'Lash Lift',
-    'Extensions',
     'Manicure'
 ];
 
@@ -74,6 +77,18 @@ if (!in_array($jam, $waktuDiizinkan, true)) {
 
 $kodeBooking = 'YN' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 $referensi = '';
+
+// Kalau booking akhirnya ditolak, foto referensi yang sudah terlanjur
+// tersimpan dibuang supaya tidak menumpuk di uploads/referensi.
+function buang_referensi(string $nama): void {
+    if ($nama === '') {
+        return;
+    }
+    $path = __DIR__ . '/../uploads/referensi/' . basename($nama);
+    if (is_file($path)) {
+        @unlink($path);
+    }
+}
 
 if (
     isset($_FILES['referensi']) &&
@@ -120,6 +135,27 @@ if (
 
 try {
     $pdo->beginTransaction();
+    // Anti-spam: satu nomor WhatsApp maksimal 3 booking yang masih menunggu konfirmasi
+    $batasMenunggu = 3;
+    $cekMenunggu = $pdo->prepare(
+        "SELECT COUNT(*)
+         FROM pesanan p
+         INNER JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan
+         WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(pl.no_whatsapp,' ',''),'-',''),'(',''),')',''),'+','')
+             = :wa
+           AND p.status = 'Menunggu Konfirmasi'
+           AND p.tanggal >= CURDATE()"
+    );
+    $cekMenunggu->execute([
+        'wa' => str_replace([' ', '-', '(', ')', '+'], '', $wa),
+    ]);
+
+    if ((int) $cekMenunggu->fetchColumn() >= $batasMenunggu) {
+        $pdo->rollBack();
+        buang_referensi($referensi);
+        exit('Kamu masih punya beberapa booking yang menunggu konfirmasi. Mohon tunggu konfirmasi dari admin atau hubungi kami via WhatsApp.');
+    }
+
     // Pembatasan kuota harian untuk layanan tertentu
 $layananTerbatas = ['Nail Art', 'Nail Tip'];
 $batasHarian = 5;
@@ -136,7 +172,22 @@ if (in_array($layanan, $layananTerbatas, true)) {
 
     if ((int) $cekKuota->fetchColumn() >= $batasHarian) {
         $pdo->rollBack();
-        exit('Maaf, kuota Nail Art & Nail Tip untuk tanggal tersebut sudah penuh (maks. 5 per hari). Silakan pilih tanggal lain.');
+        buang_referensi($referensi);
+        // Isian disimpan sementara di session supaya form bisa terisi lagi
+        // waktu pelanggan memilih tanggal lain (foto tidak bisa diisi ulang).
+        $_SESSION['kuota_penuh'] = [
+            'layanan' => $layanan,
+            'tanggal' => $tanggal,
+            'form' => [
+                'nama'    => $nama,
+                'wa'      => $wa,
+                'layanan' => $layanan,
+                'jam'     => $jam,
+                'catatan' => $catatan,
+            ],
+        ];
+        header('Location: ../pages/kuota_penuh.php');
+        exit;
     }
 }
     $cekJadwal = $pdo->prepare(
@@ -153,6 +204,7 @@ if (in_array($layanan, $layananTerbatas, true)) {
 
     if ($cekJadwal->fetchColumn() > 0) {
         $pdo->rollBack();
+        buang_referensi($referensi);
         exit('Maaf, jadwal tersebut sudah memiliki booking. Silakan pilih waktu lain.');
     }
 
@@ -227,6 +279,7 @@ $tambahPesanan->execute([
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    buang_referensi($referensi);
 
     error_log($e->getMessage());
     http_response_code(500);

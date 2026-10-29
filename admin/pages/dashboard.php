@@ -4,6 +4,16 @@
    Variabel tersedia: $p (pengaturan halaman), $A (konten), $pdo (database). */
 
 $namaAdmin = $_SESSION['admin_nama'] ?? 'Admin';
+$csrf = csrf_token();
+
+$pesanStatus = [
+    'berhasil'     => ['ok',  'Status booking berhasil diperbarui.'],
+    'tidak_diubah' => ['err', 'Status tidak diubah. Booking ini sudah diproses sebelumnya.'],
+    'tidak_valid'  => ['err', 'Permintaan tidak valid.'],
+    'csrf'         => ['err', 'Sesi formulir tidak valid. Muat ulang halaman lalu coba lagi.'],
+    'gagal'        => ['err', 'Gagal memperbarui status. Silakan coba lagi.'],
+];
+$infoPesan = $pesanStatus[$_GET['pesan'] ?? ''] ?? null;
 
 try {
     $total = (int) $pdo->query(
@@ -89,6 +99,12 @@ admin_top($p);
             </div>
         </section>
 
+        <?php if ($infoPesan): ?>
+            <div class="alert <?= h($infoPesan[0]) ?>" role="status">
+                <?= h($infoPesan[1]) ?>
+            </div>
+        <?php endif; ?>
+
         <section class="panel">
             <div class="panel-head">
                 <h2>Booking Terbaru</h2>
@@ -116,10 +132,27 @@ admin_top($p);
                             <tr>
                                 <td><?= h($item['kode_booking']) ?></td>
                                 <td><?= h($item['nama']) ?></td>
-                                <td><?= h($item['layanan']) ?></td>
+                                <td>
+    <?= h($item['layanan']) ?>
+    <?php if (!empty($item['referensi_design'])): ?>
+        <br><a class="wa-link" target="_blank" rel="noopener noreferrer"
+               href="../uploads/referensi/<?= h(rawurlencode($item['referensi_design'])) ?>">Lihat referensi</a>
+    <?php endif; ?>
+</td>
                                 <td><?= h($item['tanggal']) ?></td>
                                 <td><?= h($item['jam']) ?></td>
-                                <td><?= h($item['no_whatsapp']) ?></td>
+                                <td>
+    <?php
+    // ubah 0812... menjadi 62812... agar bisa dibuka di WhatsApp
+    $digit = preg_replace('/\D+/', '', (string) $item['no_whatsapp']);
+    if (strpos($digit, '0') === 0) { $digit = '62' . substr($digit, 1); }
+    ?>
+    <?= h($item['no_whatsapp']) ?>
+    <?php if ($digit !== ''): ?>
+        <a class="wa-link" target="_blank" rel="noopener noreferrer"
+           href="https://wa.me/<?= h($digit) ?>">Chat</a>
+    <?php endif; ?>
+</td>
                                 
 <td>
     <span class="status">
@@ -132,6 +165,7 @@ admin_top($p);
               class="inline-form">
             <input type="hidden" name="kode_booking"
                    value="<?= h($item['kode_booking']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
             <input type="hidden" name="aksi" value="konfirmasi">
             <button type="submit"
                     onclick="return confirm('Konfirmasi booking ini?')">
@@ -143,6 +177,7 @@ admin_top($p);
               class="inline-form">
             <input type="hidden" name="kode_booking"
                    value="<?= h($item['kode_booking']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
             <input type="hidden" name="aksi" value="tolak">
             <button type="submit"
                     onclick="return confirm('Tolak booking ini?')">

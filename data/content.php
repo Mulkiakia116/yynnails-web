@@ -12,15 +12,14 @@
 $I = 'assets/img/';
 
 $cats = [['Semua'], ['Nail Art','nailart','✦'], ['Press-on Nails','presson','🎀'], ['Nail Tip','tip','🦋'],
-         ['Lash Lift','lash','👁'], ['Nail Extensions','ext','💎'], ['Manicure','mani','🪷'],['Remover Nail Art','remover','♡']];
+         ['Lash Lift','lash','👁'], ['Manicure','mani','🪷'],['Remover Nail Art','remover','♡']];
 $catsS = $cats; $catsS[0] = ['Semua Layanan'];
 
 $svc = [
  ['img'=>$I.'nail.jpeg','icon'=>'💅🏻','title'=>'Nail Art','text'=>'Layanan nail art dengan berbagai desain kreatif dan custom sesuai keinginanmu.','label'=>'Mulai dari','price'=>'Rp 50.000','cat'=>'nailart','url'=>'booking.php'],
  ['img'=>$I.'press.jpeg','icon'=>'🎀','title'=>'Press-on Nails','text'=>'Kuku instan dengan desain trendy dan mudah digunakan.','label'=>'Mulai dari','price'=>'Rp 25.000','cat'=>'presson','url'=>'booking.php'],
- ['img'=>$I.'tip.jpeg','icon'=>'🍃','title'=>'Nail Tip','text'=>'Penambahan kuku dengan hasil natural dan rapi.','label'=>'Mulai dari','price'=>'Rp 100.000','cat'=>'tip','url'=>'booking.php'],
+ ['img'=>$I.'tip.jpeg','icon'=>'🍃','title'=>'Nail Tip','text'=>'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.','label'=>'Mulai dari','price'=>'Rp 100.000','cat'=>'tip','url'=>'booking.php'],
  ['img'=>$I.'lash.jpeg','icon'=>'👁','title'=>'Lash Lift','text'=>'Perawatan bulu mata agar terlihat lebih lentik dan natural.','label'=>'Mulai dari','price'=>'Rp 45.000','cat'=>'lash','url'=>'booking.php'],
- ['img'=>$I.'extensions.jpeg','icon'=>'💎','title'=>'Nail Extensions','text'=>'Perpanjangan kuku untuk tampilan yang lebih panjang dan elegan.','label'=>'Mulai dari','price'=>'Rp 50.000','cat'=>'ext','url'=>'booking.php'],
  ['img'=>$I.'manicure.jpg','icon'=>'🪷','title'=>'Manicure','text'=>'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.','label'=>'Mulai dari','price'=>'Rp 50.000','cat'=>'mani','url'=>'booking.php'],
  ['img'=>$I.'remov.jpeg','icon'=>'♡','title'=>'Remover Nail Art','text'=>'Layanan penghapusan nail art untuk membantu membersihkan kuku.','label'=>'Mulai dari','price'=>'Rp 3.000','cat'=>'remover','url'=>'booking.php'],
 ];
@@ -88,14 +87,13 @@ return [
    'link'=>['Lihat Semua Layanan','services.php'],'items'=>array_slice($svc,0,5)],
   ['type'=>'strip','id'=>'gallery','eyebrow'=>'GALERI','title'=>'Hasil Karya Kami','text'=>'Lihat beberapa hasil nail art terbaik dari Yynnails sebagai inspirasi untuk tampilanmu!',
    'button'=>['Lihat Galeri Lengkap','gallery.php'],'images'=>[$I.'g1.jpg',$I.'g2.jpg',$I.'g3.jpg',$I.'g4.jpg',$I.'g5.jpg']],
-  ['type'=>'cards','id'=>'pricelist','style'=>'tile','cols'=>5,'eyebrow'=>'PRICE LIST','title'=>'Daftar Harga','text'=>'Berikut adalah daftar harga untuk beberapa layanan unggulan di Yynnails.',
+  ['type'=>'cards','id'=>'pricelist','style'=>'tile','cols'=>4,'eyebrow'=>'PRICE LIST','title'=>'Daftar Harga','text'=>'Berikut adalah daftar harga untuk beberapa layanan unggulan di Yynnails.',
    'button'=>['Lihat Selengkapnya','pricelist.php'],
    'items'=>[
      ['icon'=>'🌸','title'=>'Nail Art','label'=>'Mulai dari','price'=>'Rp 50.000','url'=>'pricelist.php'],
      ['icon'=>'🎀','title'=>'Press-On Nails','label'=>'Mulai dari','price'=>'Rp 25.000','url'=>'pricelist.php'],
      ['icon'=>'✨','title'=>'Nail Tip','label'=>'Mulai dari','price'=>'Rp 100.000','url'=>'pricelist.php'],
-     ['icon'=>'👁','title'=>'Lash Lift','label'=>'Mulai dari','price'=>'Rp 45.000','url'=>'pricelist.php'],
-     ['icon'=>'💎','title'=>'Nail Extensions','label'=>'Mulai dari','price'=>'Rp 50.000','url'=>'pricelist.php']]],
+     ['icon'=>'👁','title'=>'Lash Lift','label'=>'Mulai dari','price'=>'Rp 45.000','url'=>'pricelist.php']]],
   ['type'=>'cta','image'=>$I.'rawat.jpeg','title'=>'Yuk, rawat kuku kamu sekarang juga!','text'=>'Tampil lebih percaya diri dengan kuku yang cantik dan sehat ♡',
    'button'=>['Booking Sekarang','booking.php'],
    'side'=>[['📅','Pilih Layanan & Tanggal'],['🕒','Isi Form Booking'],['✔','Konfirmasi Dari Kami']]],
@@ -153,14 +151,14 @@ return [
 /* ------------------------------ GALLERY ------------------------------ */
 'gallery' => ['title'=>'Gallery', 'sections'=>[
   ['type'=>'hero','eyebrow'=>'GALERI YYNNAILS','title'=>'Our Gallery','script'=>'Real Nails, Real Beauty ♡',
-   'text'=>'Koleksi hasil karya terbaik dari Yynnails, mulai dari nail art custom, press-on nails, nail tip, nail extensions, hingga berbagai desain lainnya. Temukan inspirasi untuk tampilan kuku impianmu di sini!',
+   'text'=>'Koleksi hasil karya terbaik dari Yynnails, mulai dari nail art custom, press-on nails, nail tip, hingga berbagai desain lainnya. Temukan inspirasi untuk tampilan kuku impianmu di sini!',
    'buttons'=>[['Lihat Semua Foto','#semua']],
 'image'=>$I.'banner galeri.jpeg',],
 
   ['type'=>'gallery','filter'=>$cats,'items'=>[
      ['img'=>$I.'g1.jpg','title'=>'Nail Art','count'=>'12 Foto','cat'=>'nailart'],['img'=>$I.'g2.jpg','title'=>'Press-on Nails','count'=>'10 Foto','cat'=>'presson'],
      ['img'=>$I.'g3.jpg','title'=>'Nail Tips','count'=>'14 Foto','cat'=>'tip'],['img'=>$I.'lash-lift.jpg','title'=>'Lash Lift','count'=>'8 Foto','cat'=>'lash'],
-     ['img'=>$I.'g4.jpg','title'=>'Nail Extensions','count'=>'11 Foto','cat'=>'ext'],['img'=>$I.'manicure.jpg','title'=>'Manicure','count'=>'9 Foto','cat'=>'mani'],
+     ['img'=>$I.'manicure.jpg','title'=>'Manicure','count'=>'9 Foto','cat'=>'mani'],
      ['img'=>$I.'studio-vibes.jpg','title'=>'Studio Vibes','count'=>'7 Foto','cat'=>'studio'],['img'=>$I.'custom.jpg','title'=>'Custom Design','count'=>'15 Foto','cat'=>'nailart']]],
   ['type'=>'detail','eyebrow'=>'NAIL ART','title'=>'Nail Art Custom','text'=>'Desain nail art yang dapat disesuaikan dengan keinginan pelanggan.',
    'images'=>[$I.'11.jpeg',$I.'22.jpeg',$I.'33.jpeg',$I.'44.jpeg',$I.'55.jpeg',$I.'66.jpeg'],'tags'=>['#NailArt','#Custom'],
@@ -182,9 +180,8 @@ return [
    'text'=>'Berbagai pilihan desain untuk mempercantik kuku kamu.',
    'badge'=>'Populer ♡','items'=>[
      ['img'=>$I.'art.jpg','title'=>'Nail Art','text'=>'Desain kuku custom sesuai keinginan, mulai dari yang simple hingga detail.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php'],
-     ['img'=>$I.'on.jpg','title'=>'Press-On Nails','text'=>'Kuku instan dengan desain trendy dan mudah digunakan.','price'=>'Mulai dari Rp 25.000','url'=>'booking.php'],
-     ['img'=>$I.'tip price.jpg','title'=>'Nail Tip','text'=>'Penambahan kuku dengan hasil natural dan rapi.','price'=>'Mulai dari Rp 100.000','url'=>'booking.php'],
-     ['img'=>$I.'extensions price.jpg','title'=>'Nail Extensions','text'=>'Perpanjangan kuku untuk tampilan yang lebih panjang dan elegan.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php'],
+     ['img'=>$I.'on.jpg','title'=>'Press-On Nails','text'=>'Kuku instan dengan desain trendy yang mudah di gunakan dan aman untuk kuku asli.','price'=>'Mulai dari Rp 25.000','url'=>'booking.php'],
+     ['img'=>$I.'tip price.jpg','title'=>'Nail Tip','text'=>'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.','price'=>'Mulai dari Rp 100.000','url'=>'booking.php'],
      ['img'=>$I.'manicure.jpg','title'=>'Manicure','text'=>'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php'],
      ['img'=>$I.'1.jpeg','title'=>'Custom Design','text'=>'Desain sesuai tema, warna, dan request khusus kamu.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php']
    ]],
@@ -246,10 +243,10 @@ return [
   ['type'=>'booking','steps'=>['Data Diri','Pilih Layanan','Upload Referensi','Konfirmasi'],
    'panes'=>[['Data Diri','Lengkapi informasi kamu untuk melanjutkan pemesanan.'],['Pilih Layanan','Pilih layanan yang kamu butuhkan.'],
              ['Desain / Referensi (Opsional)','Upload foto desain yang kamu inginkan atau contoh referensi lainnya.'],['Konfirmasi','Periksa kembali data pemesananmu sebelum dikirim.']],
-   'fields'=>[['Nama Lengkap','name','text','Masukkan nama lengkap kamu',1],['Nomor WhatsApp','phone','tel','Contoh: 0812 3456 7890',1],['Email (Opsional)','email','email','Masukkan email kamu'],
+   'fields'=>[['Nama Lengkap','name','text','Masukkan nama lengkap kamu',1],['Nomor WhatsApp','phone','tel','Contoh: 0812 3456 7890',1],
               ['Tanggal Booking','date','date','',1],['Waktu Pilih','time','select','Pilih waktu',1,['10:00','11:00','13:00','14:00','15:00','16:00','17:00','19:00']]],
    'services'=>[['✦','Nail Art','Rp 50.000 – 150.000'],['🎀','Press-on Nails','Rp 80.000 – 200.000'],['🍃','Nail Tip','Rp 70.000 – 180.000'],
-                ['👁','Lash Lift','Rp 100.000 – 200.000'],['💎','Extensions','Rp 150.000 – 300.000'],['🪷','Manicure','Rp 50.000 – 100.000']],
+                ['👁','Lash Lift','Rp 100.000 – 200.000'],['🪷','Manicure','Rp 50.000 – 100.000']],
    'upload'=>['Klik untuk mengunggah gambar','Format: JPG, PNG | Maks. 5MB'],
    'notes'=>['Catatan Tambahan (Opsional)','Contoh: desain khusus, warna, ukuran, atau permintaan lainnya...'],
    'consent'=>'Saya telah membaca dan menyetujui syarat & ketentuan pemesanan dari Yynnails.',

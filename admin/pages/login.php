@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username === '' || $password === '') {
         $error = 'Username dan password wajib diisi.';
+    } elseif (login_terkunci($pdo)) {
+        $error = 'Terlalu banyak percobaan login. Coba lagi dalam '
+            . LOGIN_JEDA_MENIT . ' menit.';
     } else {
         try {
             $stmt = $pdo->prepare(
@@ -32,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $admin &&
                 password_verify($password, $admin['password'])
             ) {
+                login_bersihkan($pdo);
                 session_regenerate_id(true);
 
                 $_SESSION['admin_id'] = $admin['id_admin'];
@@ -42,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            login_catat_gagal($pdo, $username);
             $error = 'Username atau password tidak sesuai.';
         } catch (Throwable $e) {
             error_log($e->getMessage());

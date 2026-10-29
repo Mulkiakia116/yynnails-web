@@ -21,7 +21,7 @@ return [
 'kategori' => [
     'Nail Art',
     'Press-on Nails',
-    'Nail Extensions',
+    'Nail Tip',
     'Manicure',
     'Lash Lift',
 ],

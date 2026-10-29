@@ -79,9 +79,18 @@ Nama folder di bawah memakai `yynnails-web`. Jika folder bernama lain (misalnya 
 - Password: `AdminDemo2026!`
 - Password ini hanya untuk demo/pengecekan tugas. Ganti lewat `admin/ubah_password.php` (minimal 12 karakter).
 
+### Sebelum dipasang di server client (checklist)
+
+1. **Ganti password admin** lewat `admin/ubah_password.php`, lalu hapus bagian "Akun Admin (demo)" di atas dari README.
+2. **Jangan pakai user `root`** di hosting. Salin `config/database.local.example.php` menjadi `config/database.local.php` dan isi dengan user database khusus + password kuat.
+3. **Jangan upload folder `database/`** ke hosting (berisi data pelanggan & hash password). Import SQL lewat phpMyAdmin hosting saja.
+4. Pastikan website memakai **HTTPS** dan file `.htaccess` ikut terupload (Apache).
+5. Bersihkan data contoh (pelanggan/booking uji coba) di database sebelum dipakai.
+6. Database lama: jalankan `database/migrasi_login_gagal.sql` sekali (tabel pembatas login).
+
 ## Skema Database
 
-Tabel: `admin`, `galeri`, `jadwal`, `layanan`, `pelanggan`, `pesanan`.
+Tabel: `admin`, `galeri`, `jadwal`, `layanan`, `login_gagal`, `pelanggan`, `pesanan`.
 Relasi: `pesanan.id_pelanggan → pelanggan.id_pelanggan`, `jadwal.id_pesanan → pesanan.id_pesanan`.
 
 ## Catatan

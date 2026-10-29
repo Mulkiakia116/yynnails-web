@@ -8,6 +8,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+if (!csrf_valid($_POST['csrf_token'] ?? '')) {
+    header('Location: dashboard.php?pesan=csrf');
+    exit;
+}
+
 $kode = trim($_POST['kode_booking'] ?? '');
 $aksi = $_POST['aksi'] ?? '';
 

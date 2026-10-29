@@ -228,7 +228,7 @@ function s_gallery($s){
   $kategoriList = [
     'Nail Art',
     'Press-on Nails',
-    'Nail Extensions',
+    'Nail Tip',
     'Manicure',
     'Lash Lift'
   ];
@@ -382,9 +382,14 @@ function s_follow($s){
      . '<div class="box chat"><span class="ic big">💬</span><div><b>'.e($c[0]).'</b><p>'.nl($c[1]).'</p></div>'.btn([$c[2], '@wa']).'</div></div></section>';
 }
 function s_booking($s){
+  global $isiForm;
   $P = $s['panes']; $sm = $s['summary']; $b = $s['btn'];
   
-echo '<section class="sec"><div class="wrap bk"><form class="box" id="bk" method="post" action="actions/proses_booking.php" enctype="multipart/form-data"><ol class="stp">';
+echo '<section class="sec"><div class="wrap bk"><form class="box" id="bk" method="post" action="actions/proses_booking.php" enctype="multipart/form-data">';
+  if (!empty($isiForm)) {
+    echo '<p class="note">✨ Datamu sudah terisi kembali. Tinggal pilih <b>tanggal lain</b>, dan unggah ulang foto referensi kalau ada.</p>';
+  }
+  echo '<ol class="stp">';
 
   foreach ($s['steps'] as $k => $t) echo '<li'.($k ? '' : ' class="on"').'>'.e($t).'</li>';
   echo '</ol>';
@@ -399,6 +404,8 @@ echo '<div class="pane"><h3>'.e($P[2][0]).'</h3><p class="mut">'.e($P[2][1]).'</
  
 echo '<div class="pane"><h3>'.e($P[3][0]).'</h3><p class="mut">'.e($P[3][1]).'</p><ul id="review" class="sum"></ul><label class="chk-l"><input type="checkbox" name="consent" value="1" required> '.e($s['consent']).'</label></div>';
 
+  // Kolom jebakan anti-spam: tidak terlihat manusia, bot biasanya mengisinya
+  echo '<div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true"><label>Jangan diisi<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>';
   echo '<div class="bnav"><button type="button" class="btn ghost" id="prev" hidden>'.e($b[2]).'</button><button type="button" class="btn primary" id="next" data-next="'.e($b[0]).'" data-send="'.e($b[1]).'">'.e($b[0]).' 2 →</button></div></form>';
  
 
@@ -420,6 +427,19 @@ if (!empty($s['status_button'])) {
 }
 
 echo '</aside></div></section>';
+
+// Isi ulang form dari halaman "Kuota Penuh" (tanggal sengaja dikosongkan)
+if (!empty($isiForm)) {
+  $json = json_encode($isiForm, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+  echo '<script>window.addEventListener("load",function(){'
+     . 'var d='.$json.',f=document.getElementById("bk");if(!f)return;'
+     . 'function s(n,v){var e=f.querySelector("[name=\""+n+"\"]");if(e&&v)e.value=v;}'
+     . 's("name",d.nama);s("phone",d.wa);s("time",d.jam);s("notes",d.catatan);'
+     . 'f.querySelectorAll("input[name=service]").forEach(function(x){if(x.value===d.layanan)x.checked=true;});'
+     . 'f.dispatchEvent(new Event("input",{bubbles:true}));f.dispatchEvent(new Event("change",{bubbles:true}));'
+     . 'var t=f.querySelector("[name=date]");if(t){t.value="";t.focus();}'
+     . '});</script>';
+}
 }
 
 

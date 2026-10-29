@@ -7,7 +7,8 @@
    Layout dipecah: header.php, navbar.php, footer.php (satu folder ini).
    Konten & pengaturan halaman ada di admin/data/content.php. */
 
-session_start();
+require_once __DIR__ . '/../../includes/session.php';
+mulai_session();
 
 require __DIR__ . '/../../config/database.php';   // menyediakan $pdo
 $A = require __DIR__ . '/../data/content.php';    // konten & pengaturan admin
@@ -46,6 +47,57 @@ function csrf_valid($tokenForm): bool {
         && is_string($tokenSesi)
         && $tokenForm !== ''
         && hash_equals($tokenSesi, $tokenForm);
+}
+
+/* ---------- Pembatas percobaan login ----------
+   Maksimal 5 kali gagal dalam 15 menit per alamat IP.
+   Kalau tabel `login_gagal` belum dibuat, pembatas dilewati
+   (login tetap jalan) dan errornya dicatat di log. */
+const LOGIN_MAKS_GAGAL = 5;
+const LOGIN_JEDA_MENIT = 15;
+
+function ip_pengunjung(): string {
+    return substr((string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'), 0, 45);
+}
+
+function login_terkunci(PDO $pdo): bool {
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT COUNT(*) FROM login_gagal
+             WHERE ip = :ip
+               AND waktu > (NOW() - INTERVAL ' . LOGIN_JEDA_MENIT . ' MINUTE)'
+        );
+        $stmt->execute(['ip' => ip_pengunjung()]);
+        return (int) $stmt->fetchColumn() >= LOGIN_MAKS_GAGAL;
+    } catch (Throwable $e) {
+        error_log('login_terkunci: ' . $e->getMessage());
+        return false;
+    }
+}
+
+function login_catat_gagal(PDO $pdo, string $username): void {
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO login_gagal (ip, username) VALUES (:ip, :username)'
+        );
+        $stmt->execute([
+            'ip' => ip_pengunjung(),
+            'username' => substr($username, 0, 100),
+        ]);
+        // bersihkan catatan lama supaya tabel tidak menumpuk
+        $pdo->exec('DELETE FROM login_gagal WHERE waktu < (NOW() - INTERVAL 1 DAY)');
+    } catch (Throwable $e) {
+        error_log('login_catat_gagal: ' . $e->getMessage());
+    }
+}
+
+function login_bersihkan(PDO $pdo): void {
+    try {
+        $stmt = $pdo->prepare('DELETE FROM login_gagal WHERE ip = :ip');
+        $stmt->execute(['ip' => ip_pengunjung()]);
+    } catch (Throwable $e) {
+        error_log('login_bersihkan: ' . $e->getMessage());
+    }
 }
 
 // Kembali ke halaman galeri membawa pesan
