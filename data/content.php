@@ -67,6 +67,16 @@ return [
 ],
 'cta_nav' => ['Booking Sekarang', 'booking.php'],
 
+/* ---- ATURAN KUOTA HARIAN ----------------------------------------------
+   Layanan di daftar 'layanan' dibatasi 'batas_harian' pelanggan per hari
+   (dihitung gabungan). Layanan lain tidak dibatasi kuota ini.
+   Nama layanan harus sama persis dengan yang ada di form booking.
+   Ubah angka / daftar di sini saja, proses booking otomatis ikut. */
+'kuota' => [
+    'batas_harian' => 5,
+    'layanan'      => ['Nail Art', 'Nail Tip'],
+],
+
 'pages' => [
 
 /* ------------------------------ HOME ------------------------------ */
@@ -180,7 +190,7 @@ return [
    'text'=>'Berbagai pilihan desain untuk mempercantik kuku kamu.',
    'badge'=>'Populer ♡','items'=>[
      ['img'=>$I.'art.jpg','title'=>'Nail Art','text'=>'Desain kuku custom sesuai keinginan, mulai dari yang simple hingga detail.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php'],
-     ['img'=>$I.'on.jpg','title'=>'Press-On Nails','text'=>'Kuku instan dengan desain trendy yang mudah di gunakan dan aman untuk kuku asli.','price'=>'Mulai dari Rp 25.000','url'=>'booking.php'],
+     ['img'=>$I.'on.jpg','title'=>'Press-On Nails','text'=>'Kuku instan dengan desain trendy dan mudah digunakan.','price'=>'Mulai dari Rp 25.000','url'=>'booking.php'],
      ['img'=>$I.'tip price.jpg','title'=>'Nail Tip','text'=>'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.','price'=>'Mulai dari Rp 100.000','url'=>'booking.php'],
      ['img'=>$I.'manicure.jpg','title'=>'Manicure','text'=>'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php'],
      ['img'=>$I.'1.jpeg','title'=>'Custom Design','text'=>'Desain sesuai tema, warna, dan request khusus kamu.','price'=>'Mulai dari Rp 50.000','url'=>'booking.php']
@@ -266,6 +276,29 @@ return [
    // contoh data booking — ganti / tambah sesuai kebutuhan (nanti bisa disambungkan ke database)
    'bookings'=>[['code'=>'YN20250925-001','wa'=>'0858 2528 0212','name'=>'Contoh Pelanggan','service'=>'Nail Art','date'=>'25 September 2025','time'=>'14:00 WITA','status'=>'Dikonfirmasi','note'=>'Sampai jumpa di studio ya ♡']]],
   ['type'=>'features','style'=>'bar','items'=>[['🛡','Aman & Terpercaya','Data kamu terlindungi'],['⚡','Proses Cepat','Cek hanya dalam hitungan detik'],['❤','Mudah Digunakan','Tanpa ribet']]],
+]],
+
+/* ---- HALAMAN KUOTA PENUH ------------------------------------------------
+   Tampil kalau pelanggan memilih tanggal yang kuotanya sudah habis.
+   Tulisan yang bisa dipakai di teks:
+     {layanan} = layanan yang dipilih pelanggan
+     {tanggal} = tanggal yang dipilih (contoh: 12 Desember 2026)
+     {batas}   = batas per hari (dari 'kuota' di atas)
+   Tombol: ['Tulisan tombol', 'tujuan', 'gaya'] — gaya boleh dikosongkan. */
+'kuota_penuh' => ['title'=>'Kuota Penuh', 'sections'=>[
+  ['type'=>'kuota',
+   'icon'=>'📅',
+   'title'=>'Kuota Sudah Penuh',
+   'text'=>'Maaf, jadwal {layanan} pada tanggal {tanggal} sudah penuh.',
+   'label_layanan'=>'Layanan',
+   'label_tanggal'=>'Tanggal yang dipilih',
+   'hint_title'=>'ℹ️ Kenapa bisa penuh?',
+   'hint'=>'Nail Art dan Nail Tip dibatasi maksimal {batas} pelanggan per hari. Silakan pilih tanggal lain, ya. Layanan lain masih bisa dipesan di tanggal ini selama jamnya tersedia.',
+   'buttons'=>[
+     ['Pilih Tanggal Lain', 'booking.php?isi=1'],
+     ['Tanya Jadwal via WhatsApp', '@wa', 'ghost'],
+     ['Kembali ke Beranda', 'index.php', 'ghost'],
+   ]],
 ]],
 
 ],

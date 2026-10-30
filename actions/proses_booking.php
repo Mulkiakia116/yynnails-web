@@ -157,14 +157,20 @@ try {
     }
 
     // Pembatasan kuota harian untuk layanan tertentu
-$layananTerbatas = ['Nail Art', 'Nail Tip'];
-$batasHarian = 5;
+// Aturan kuota (layanan & batas per hari) diatur di data/content.php -> 'kuota'
+$aturanKuota = (function () {
+    $C = require __DIR__ . '/../data/content.php';
+    return $C['kuota'];
+})();
+$layananTerbatas = $aturanKuota['layanan'];
+$batasHarian = (int) $aturanKuota['batas_harian'];
 
 if (in_array($layanan, $layananTerbatas, true)) {
+    $tandaTanya = implode(', ', array_fill(0, count($layananTerbatas), '?'));
     $cekKuota = $pdo->prepare(
         "SELECT COUNT(*) FROM pesanan
          WHERE tanggal = ?
-           AND layanan IN (?, ?)
+           AND layanan IN ($tandaTanya)
            AND status IN ('Menunggu Konfirmasi', 'Dikonfirmasi', 'Selesai')
          FOR UPDATE"
     );
@@ -186,7 +192,7 @@ if (in_array($layanan, $layananTerbatas, true)) {
                 'catatan' => $catatan,
             ],
         ];
-        header('Location: ../pages/kuota_penuh.php');
+        header('Location: ../kuota_penuh.php');
         exit;
     }
 }

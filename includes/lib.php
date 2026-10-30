@@ -443,6 +443,40 @@ if (!empty($isiForm)) {
 }
 
 
+// 2026-12-12 -> "12 Desember 2026"
+function tgl_indo($tanggal){
+  $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  $d = DateTime::createFromFormat('!Y-m-d', (string) $tanggal);
+  return $d ? $d->format('j').' '.$bulan[(int) $d->format('n')].' '.$d->format('Y') : (string) $tanggal;
+}
+
+/* Halaman Kuota Penuh. Teks dari data/content.php (halaman 'kuota_penuh').
+   Data layanan & tanggal dikirim dari actions/proses_booking.php lewat
+   $kuotaInfo (diisi oleh kuota_penuh.php). */
+function s_kuota($s){
+  global $C, $kuotaInfo;
+  $ganti = [
+    '{layanan}' => g($kuotaInfo ?? [], 'layanan', '-'),
+    '{tanggal}' => tgl_indo(g($kuotaInfo ?? [], 'tanggal', '')),
+    '{batas}'   => g(g($C, 'kuota', []), 'batas_harian', ''),
+  ];
+  $isi = function($t) use ($ganti){ return nl(strtr((string) $t, $ganti)); };
+
+  echo '<section class="sec"><div class="wrap kp"><div class="box">'
+     . '<div class="kp-ic">'.e($s['icon']).'</div>'
+     . '<h2>'.e($s['title']).'</h2>'
+     . '<p class="mut">'.$isi($s['text']).'</p>'
+     . '<div class="kp-detail">'
+     .   '<small>'.e($s['label_layanan']).'</small><b>'.e($ganti['{layanan}']).'</b>'
+     .   '<small>'.e($s['label_tanggal']).'</small><b>'.e($ganti['{tanggal}']).'</b>'
+     . '</div>'
+     . '<div class="note"><b>'.e($s['hint_title']).'</b><br>'.$isi($s['hint']).'</div>'
+     . btns($s['buttons'])
+     . '</div></div></section>';
+}
+
+
 function s_status($s){
     $q = trim($_GET['q'] ?? '');
     $r = null;
