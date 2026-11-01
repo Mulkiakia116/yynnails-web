@@ -15,7 +15,7 @@ function u($x){
     '@fb'=>$s['fb'],
     '@mail'=>'mailto:'.$s['email'],
     '@maps'=>$s['maps'],
-    '@contact'=>'?page=contact-detail'
+    '@contact'=>'contact.php'
   ];
   return e($m[$x] ?? $x);
 }
@@ -101,6 +101,9 @@ function socials(){
     return '<div class="soc">'.$o.'</div>';
 }
 
+require_once __DIR__ . '/db.php';       // koneksi database (db())
+require_once __DIR__ . '/layanan.php';  // data layanan & harga dari database
+
 /* layout dipecah: includes/header.php, navbar.php, footer.php */
 require_once __DIR__ . '/header.php';
 require_once __DIR__ . '/footer.php';
@@ -151,6 +154,10 @@ function s_features($s){
   echo '<section class="sec"><div class="wrap fgrid"><div>'.head($s).'</div>'.ics($s['items'], 'fcards').'</div></section>';
 }
 function s_cards($s){
+  if (!empty($s['source'])) {   // data kartu diambil dari database (tabel layanan)
+    $s['items'] = layanan_items($s['source']);
+    if (g($s,'filter') === 'auto') $s['filter'] = layanan_filter();
+  }
   $st = g($s,'style','service');
   echo '<section'.(!empty($s['id']) ? ' id="'.e($s['id']).'"' : '').' class="sec"><div class="wrap" data-filter-scope><div class="shead"><div>'.head($s).'</div>'
      . (!empty($s['badge']) ? '<span class="tag fill">'.e($s['badge']).'</span>' : '')
@@ -168,11 +175,12 @@ function s_cards($s){
        . '<b class="'.(in_array($st, ['price','photo']) ? 'pill' : 'pr').'">'.e($i['price']).'</b>'
        . '<a class="go" href="'.u(g($i,'url','booking.php')).'">→</a></div></div></article>';
   }
+  if (empty($s['items'])) echo '<p class="mut">Data layanan belum tersedia.</p>';
   echo '</div></div></section>';
 }
 
 function s_strip($s){
-  require_once __DIR__ . '/../config/database.php';
+  $pdo = db();
 
   $images = [];
 
@@ -223,15 +231,9 @@ function s_strip($s){
 }
 
 function s_gallery($s){
-  require_once __DIR__ . '/../config/database.php';
+  $pdo = db();
 
-  $kategoriList = [
-    'Nail Art',
-    'Press-on Nails',
-    'Nail Tip',
-    'Manicure',
-    'Lash Lift'
-  ];
+  $kategoriList = layanan_nama_booking();   // kategori = nama layanan di database
 
   try {
     $stmt = $pdo->query(
@@ -395,7 +397,9 @@ echo '<section class="sec"><div class="wrap bk"><form class="box" id="bk" method
   echo '</ol>';
   echo '<div class="pane on"><h3>'.e($P[0][0]).'</h3><p class="mut">'.e($P[0][1]).'</p><div class="two2">'.fields($s['fields']).'</div></div>';
   echo '<div class="pane"><h3>'.e($P[1][0]).'</h3><p class="mut">'.e($P[1][1]).'</p><div class="opts">';
-  foreach ($s['services'] as $k => $v) echo '<label><input type="radio" name="service" value="'.e($v[1]).'" data-p="'.e($v[2]).'" data-l="Layanan"'.($k ? '' : ' required').'><span class="ic">'.e($v[0]).'</span><span><b>'.e($v[1]).'</b><small>'.e($v[2]).'</small></span></label>';
+  $ly = layanan_booking();
+  if (!$ly) echo '<p class="note">Daftar layanan belum tersedia. Silakan hubungi kami via WhatsApp.</p>';
+  foreach ($ly as $k => $v) echo '<label><input type="radio" name="service" value="'.e($v[1]).'" data-p="'.e($v[2]).'" data-l="Layanan"'.($k ? '' : ' required').'><span class="ic">'.e($v[0]).'</span><span><b>'.e($v[1]).'</b><small>'.e($v[2]).'</small></span></label>';
   echo '</div></div>';
   
 echo '<div class="pane"><h3>'.e($P[2][0]).'</h3><p class="mut">'.e($P[2][1]).'</p><label class="drop"><input type="file" name="referensi" accept="image/jpeg,image/png,image/webp" data-l="Referensi Desain" hidden><b>⬆ '.e($s['upload'][0]).'</b><br><small>'.e($s['upload'][1]).'</small></label>'
@@ -486,7 +490,7 @@ function s_status($s){
         $dicari = true;
 
         try {
-            require_once __DIR__ . '/../config/database.php';
+            $pdo = db();
 
             $stmt = $pdo->prepare(
                 'SELECT

@@ -5,8 +5,8 @@ Pelanggan dapat melihat layanan & daftar harga, melakukan booking online, dan me
 Admin dapat login, mengelola status pesanan, dan mengelola galeri karya.
 
 - **Mitra:** Yynnails Nail Studio (Palopo, Sulawesi Selatan)
-- **Pengembang:** Mulkiah Nur Patimah J (24404163)
-- **Mata kuliah:** Project Independent 1 – Tugas 6
+- **Pengembang:** Mulkiah Nur Fatimah J (24404163)
+- **Mata kuliah:** Project Mandiri – Tugas 7 (Core Feature Implementation & Dynamic Data Binding)
 
 ## Tech Stack
 
@@ -87,6 +87,8 @@ Nama folder di bawah memakai `yynnails-web`. Jika folder bernama lain (misalnya 
 4. Pastikan website memakai **HTTPS** dan file `.htaccess` ikut terupload (Apache).
 5. Bersihkan data contoh (pelanggan/booking uji coba) di database sebelum dipakai.
 6. Database lama: jalankan `database/migrasi_login_gagal.sql` sekali (tabel pembatas login).
+7. Database lama (sudah pernah import): jalankan `database/migrasi_layanan.sql` sekali supaya tabel `layanan` berisi data layanan & harga.
+8. Database lama yang belum punya kolom `durasi_menit`: jalankan `database/migrasi_jadwal.sql` sekali (tabel `jadwal` terisi otomatis saat booking dikonfirmasi).
 
 ## Skema Database
 
@@ -95,5 +97,6 @@ Relasi: `pesanan.id_pelanggan → pelanggan.id_pelanggan`, `jadwal.id_pesanan �
 
 ## Catatan
 
-- Konten halaman publik (teks, harga, gambar, link) diatur di `data/content.php`.
+- Teks dan gambar halaman publik diatur di `data/content.php`.
+- **Layanan & harga dibaca dari tabel `layanan` di database** (Home, Services, Price List, form Booking, dan validasi booking). Ubah harga lewat phpMyAdmin, tampilan web ikut berubah.
 - Folder `uploads/referensi/` berisi data pelanggan dan tidak ikut di-commit ke Git (lihat `.gitignore`).

@@ -53,13 +53,16 @@ if ($tanggalObj < $hariIni) {
 }
 
 
-$layananDiizinkan = [
-    'Nail Art',
-    'Press-on Nails',
-    'Nail Tip',
-    'Lash Lift',
-    'Manicure'
-];
+// Layanan yang boleh dibooking diambil dari tabel `layanan` (bukan ditulis manual)
+try {
+    $layananDiizinkan = $pdo->query(
+        'SELECT nama_layanan FROM layanan WHERE aktif = 1 AND bisa_booking = 1'
+    )->fetchAll(PDO::FETCH_COLUMN);
+} catch (Throwable $e) {
+    error_log($e->getMessage());
+    http_response_code(500);
+    exit('Daftar layanan belum dapat dimuat. Silakan coba lagi.');
+}
 
 if (!in_array($layanan, $layananDiizinkan, true)) {
     exit('Pilihan layanan tidak valid.');

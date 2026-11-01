@@ -2,7 +2,7 @@
 /* ==========================================================================
    SEMUA KONTEN & PENGATURAN PANEL ADMIN ADA DI FILE INI.
    - nav      : menu samping (label, link, kunci halaman aktif)
-   - kategori : daftar kategori galeri (dipakai form tambah/edit & validasi)
+   - (kategori galeri diambil dari tabel `layanan` di admin/includes/lib.php)
    - pesan_galeri : teks notifikasi di halaman galeri
    - pages    : pengaturan tiap halaman (judul, class <body>, CSS, JS, wajib login)
    - actions  : daftar proses (simpan, ubah, hapus, dll.) dan apakah wajib login
@@ -16,14 +16,6 @@ return [
     ['Dashboard',     'dashboard.php', 'dashboard'],
     ['Galeri Karya',  'galeri.php',    'galeri'],
     ['Lihat Website', '../index.php',  ''],
-],
-
-'kategori' => [
-    'Nail Art',
-    'Press-on Nails',
-    'Nail Tip',
-    'Manicure',
-    'Lash Lift',
 ],
 
 'pesan_galeri' => [

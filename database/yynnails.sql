@@ -23,28 +23,28 @@ USE `yynnails`;
 -- Dumping structure for table yynnails.admin
 CREATE TABLE IF NOT EXISTS `admin` (
   `id_admin` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `nama` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_admin`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table yynnails.admin: ~1 rows (approximately)
+-- Dumping data for table yynnails.admin: ~0 rows (approximately)
 INSERT INTO `admin` (`id_admin`, `username`, `password`, `nama`, `created_at`) VALUES
 	(1, 'admin', '$2y$10$kDw6rCma4xz0syiHX4KtV.Wdct5LkBH4qt7/rD19e8aZYR821ngpS', 'mulkia', '2026-10-08 01:34:40');
 
 -- Dumping structure for table yynnails.galeri
 CREATE TABLE IF NOT EXISTS `galeri` (
   `id_galeri` int unsigned NOT NULL AUTO_INCREMENT,
-  `judul` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kategori` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `foto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `deskripsi` text COLLATE utf8mb4_unicode_ci,
+  `judul` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kategori` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `foto` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `karya_terbaik` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_galeri`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table yynnails.galeri: ~7 rows (approximately)
 INSERT INTO `galeri` (`id_galeri`, `judul`, `kategori`, `foto`, `deskripsi`, `created_at`, `karya_terbaik`) VALUES
@@ -54,7 +54,9 @@ INSERT INTO `galeri` (`id_galeri`, `judul`, `kategori`, `foto`, `deskripsi`, `cr
 	(6, 'indah', 'Lash Lift', 'uploads/galeri/fbb806e35c4d6d40e4ef73f17a64ec3d.jpg', 'bagus', '2026-10-15 18:41:44', 1),
 	(7, 'ayu', 'Nail Tip', 'uploads/galeri/798af1be5f72f950f1c6f7e3f69e6ef0.jpg', 'for u', '2026-10-15 18:42:12', 1),
 	(9, 'POLKADOT', 'Nail Art', 'uploads/galeri/3c2ed2a2cfcfd38695ff243dfb63fd8a.jpg', 'BERBINTIK SEPERTI PIBE', '2026-10-27 06:33:29', 0),
-	(10, 'pelangi', 'Press-on Nails', 'uploads/galeri/51809212a2c5cec95cce9b56659e54f4.jpg', 'hiasi kuku mu dengan warna', '2026-10-28 15:55:17', 0);
+	(10, 'pelangi', 'Press-on Nails', 'uploads/galeri/51809212a2c5cec95cce9b56659e54f4.jpg', 'hiasi kuku mu dengan warna', '2026-10-28 15:55:17', 0),
+	(11, 'manis', 'Press-on Nails', 'uploads/galeri/6bf0abcba5a127427e895df4f3a15a95.jpg', NULL, '2026-11-01 07:43:40', 1),
+	(12, 'manis', 'Press-on Nails', 'uploads/galeri/a24c8bb780f8137acc71ba541d234232.jpg', NULL, '2026-11-01 07:44:02', 1);
 
 -- Dumping structure for table yynnails.jadwal
 CREATE TABLE IF NOT EXISTS `jadwal` (
@@ -63,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `jadwal` (
   `tanggal` date NOT NULL,
   `jam_mulai` time NOT NULL,
   `jam_selesai` time NOT NULL,
-  `status` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_jadwal`),
   KEY `id_pesanan` (`id_pesanan`),
   CONSTRAINT `jadwal_ibfk_1` FOREIGN KEY (`id_pesanan`) REFERENCES `pesanan` (`id_pesanan`)
@@ -77,17 +79,37 @@ CREATE TABLE IF NOT EXISTS `layanan` (
   `nama_layanan` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `deskripsi` text COLLATE utf8mb4_general_ci NOT NULL,
   `harga` decimal(12,2) NOT NULL,
-  `gambar` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `satuan` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `gambar` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `gambar_harga` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `ikon` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '✦',
+  `kategori` varchar(30) COLLATE utf8mb4_general_ci NOT NULL,
+  `kelompok` enum('utama','lainnya') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'utama',
+  `urutan` int NOT NULL DEFAULT '0',
+  `tampil_layanan` tinyint(1) NOT NULL DEFAULT '1',
+  `tampil_harga` tinyint(1) NOT NULL DEFAULT '1',
+  `bisa_booking` tinyint(1) NOT NULL DEFAULT '1',
+  `unggulan` tinyint(1) NOT NULL DEFAULT '0',
+  `aktif` tinyint(1) NOT NULL DEFAULT '1',
+  `durasi_menit` int NOT NULL DEFAULT '60',
   PRIMARY KEY (`id_layanan`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table yynnails.layanan: ~0 rows (approximately)
+-- Dumping data for table yynnails.layanan: ~7 rows (approximately)
+INSERT INTO `layanan` (`id_layanan`, `nama_layanan`, `deskripsi`, `harga`, `satuan`, `gambar`, `gambar_harga`, `ikon`, `kategori`, `kelompok`, `urutan`, `tampil_layanan`, `tampil_harga`, `bisa_booking`, `unggulan`, `aktif`, `durasi_menit`) VALUES
+	(1, 'Nail Art', 'Layanan nail art dengan berbagai desain kreatif dan custom sesuai keinginanmu.', 50000.00, '', 'assets/img/nail.jpeg', 'assets/img/art.jpg', '💅🏻', 'nailart', 'utama', 1, 1, 1, 1, 1, 1, 90),
+	(2, 'Press-on Nails', 'Kuku instan dengan desain trendy dan mudah digunakan.', 25000.00, '', 'assets/img/press.jpeg', 'assets/img/on.jpg', '🎀', 'presson', 'utama', 2, 1, 1, 1, 1, 1, 60),
+	(3, 'Nail Tip', 'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.', 100000.00, '', 'assets/img/tip.jpeg', 'assets/img/tip price.jpg', '🍃', 'tip', 'utama', 3, 1, 1, 1, 1, 1, 120),
+	(4, 'Lash Lift', 'Perawatan bulu mata agar terlihat lebih lentik dan natural.', 45000.00, '', 'assets/img/lash.jpeg', 'assets/img/lift.png', '👁', 'lash', 'lainnya', 4, 1, 1, 1, 1, 1, 60),
+	(5, 'Manicure', 'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.', 50000.00, '', 'assets/img/manicure.jpg', 'assets/img/manicure.jpg', '🪷', 'mani', 'utama', 5, 1, 1, 1, 0, 1, 45),
+	(6, 'Remover Nail Art', 'Layanan penghapusan nail art untuk membantu membersihkan kuku.', 3000.00, '/Jari', 'assets/img/remov.jpeg', 'assets/img/remov.jpeg', '♡', 'remover', 'lainnya', 6, 1, 1, 0, 0, 1, 30),
+	(7, 'Custom Design', 'Desain sesuai tema, warna, dan request khusus kamu.', 50000.00, '', 'assets/img/1.jpeg', 'assets/img/1.jpeg', '✏', 'custom', 'utama', 7, 0, 1, 0, 0, 1, 90);
 
 -- Dumping structure for table yynnails.login_gagal
 CREATE TABLE IF NOT EXISTS `login_gagal` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `ip` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `username` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `waktu` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_ip_waktu` (`ip`,`waktu`)
@@ -98,8 +120,8 @@ CREATE TABLE IF NOT EXISTS `login_gagal` (
 -- Dumping structure for table yynnails.pelanggan
 CREATE TABLE IF NOT EXISTS `pelanggan` (
   `id_pelanggan` int NOT NULL AUTO_INCREMENT,
-  `nama` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `no_whatsapp` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `no_whatsapp` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_pelanggan`)
@@ -114,13 +136,13 @@ INSERT INTO `pelanggan` (`id_pelanggan`, `nama`, `no_whatsapp`, `created_at`, `u
 CREATE TABLE IF NOT EXISTS `pesanan` (
   `id_pesanan` int NOT NULL AUTO_INCREMENT,
   `id_pelanggan` int NOT NULL,
-  `kode_booking` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `layanan` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `kode_booking` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `layanan` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tanggal` date NOT NULL,
   `jam` time NOT NULL,
-  `referensi_design` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `catatan` text COLLATE utf8mb4_general_ci NOT NULL,
-  `status` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `referensi_design` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `catatan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_pesanan`),
   KEY `id_pelanggan` (`id_pelanggan`),
@@ -144,6 +166,17 @@ INSERT INTO `pesanan` (`id_pesanan`, `id_pelanggan`, `kode_booking`, `layanan`, 
 	(13, 2, 'YN20261028-B245C5', 'Nail Tip', '2026-10-30', '13:00:00', '', '', 'Menunggu Konfirmasi', '2026-10-28 16:02:07'),
 	(14, 2, 'YN20261028-D8CADF', 'Nail Art', '2026-10-30', '14:00:00', '', '', 'Menunggu Konfirmasi', '2026-10-28 16:02:46'),
 	(15, 2, 'YN20261028-9960E6', 'Nail Art', '2026-10-30', '15:00:00', '', '', 'Menunggu Konfirmasi', '2026-10-28 16:03:14');
+
+-- Jadwal untuk booking yang sudah berstatus Dikonfirmasi
+-- (jam selesai = jam mulai + durasi layanan di tabel `layanan`)
+INSERT INTO `jadwal` (`id_pesanan`, `tanggal`, `jam_mulai`, `jam_selesai`, `status`)
+SELECT p.id_pesanan, p.tanggal, p.jam,
+       ADDTIME(p.jam, SEC_TO_TIME(COALESCE(l.durasi_menit, 60) * 60)),
+       'Terjadwal'
+FROM `pesanan` p
+LEFT JOIN `layanan` l ON l.nama_layanan = p.layanan
+WHERE p.status = 'Dikonfirmasi'
+  AND NOT EXISTS (SELECT 1 FROM `jadwal` j WHERE j.id_pesanan = p.id_pesanan);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

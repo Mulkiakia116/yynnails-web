@@ -13,6 +13,19 @@ mulai_session();
 require __DIR__ . '/../../config/database.php';   // menyediakan $pdo
 $A = require __DIR__ . '/../data/content.php';    // konten & pengaturan admin
 
+// Kategori galeri = nama layanan yang bisa dibooking, diambil dari tabel `layanan`
+// (sama persis dengan website publik, jadi tidak perlu ditulis manual lagi).
+try {
+    $A['kategori'] = $pdo->query(
+        'SELECT nama_layanan FROM layanan
+         WHERE aktif = 1 AND bisa_booking = 1
+         ORDER BY urutan, id_layanan'
+    )->fetchAll(PDO::FETCH_COLUMN);
+} catch (Throwable $e) {
+    error_log('Gagal memuat kategori galeri: ' . $e->getMessage());
+    $A['kategori'] = [];
+}
+
 require_once __DIR__ . '/header.php';
 require_once __DIR__ . '/navbar.php';
 require_once __DIR__ . '/footer.php';
