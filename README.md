@@ -30,7 +30,7 @@ yynnails-web/
 │   ├── js/         app.js
 │   └── img/        logo, banner, foto layanan
 ├── config/         database.php  (koneksi PDO)
-├── database/       yynnails.sql  (skema + data awal)
+├── database/       yynnails.sql  (SATU file: semua tabel + data awal)
 ├── includes/       lib.php, header.php, navbar.php, footer.php
 ├── data/           content.php   (semua teks/harga/gambar halaman)
 ├── pages/          booking_berhasil.php
@@ -54,7 +54,7 @@ Nama folder di bawah memakai `yynnails-web`. Jika folder bernama lain (misalnya 
 1. Jalankan **Laragon** lalu klik **Start All** (Apache + MySQL).
 2. Salin/ekstrak folder `yynnails-web` ke `C:\laragon\www\`.
 3. Buka **phpMyAdmin** (Laragon: klik kanan > MySQL > phpMyAdmin) atau HeidiSQL, lalu **Import** file `database/yynnails.sql`.
-      (File ini otomatis membuat database `yynnails`. Jika database `yynnails` sudah ada, isinya akan dihapus dan dibuat ulang, jadi aman di-import berulang kali.)
+      (File ini otomatis membuat database `yynnails`. Jika database `yynnails` sudah ada, data lama TIDAK dihapus: tabel yang sudah ada dibiarkan dan data awal hanya ditambahkan bila belum ada, jadi aman di-import berulang kali.)
 4. Cek koneksi database di `config/database.php` (default Laragon: host `localhost`, user `root`, password kosong).
 5. Pastikan folder `uploads/referensi/` dan `uploads/galeri/` bisa ditulis.
 6. Buka di browser:
@@ -85,14 +85,12 @@ Nama folder di bawah memakai `yynnails-web`. Jika folder bernama lain (misalnya 
 2. **Jangan pakai user `root`** di hosting. Salin `config/database.local.example.php` menjadi `config/database.local.php` dan isi dengan user database khusus + password kuat.
 3. **Jangan upload folder `database/`** ke hosting (berisi data pelanggan & hash password). Import SQL lewat phpMyAdmin hosting saja.
 4. Pastikan website memakai **HTTPS** dan file `.htaccess` ikut terupload (Apache).
-5. Bersihkan data contoh (pelanggan/booking uji coba) di database sebelum dipakai.
-6. Database lama: jalankan `database/migrasi_login_gagal.sql` sekali (tabel pembatas login).
-7. Database lama (sudah pernah import): jalankan `database/migrasi_layanan.sql` sekali supaya tabel `layanan` berisi data layanan & harga.
-8. Database lama yang belum punya kolom `durasi_menit`: jalankan `database/migrasi_jadwal.sql` sekali (tabel `jadwal` terisi otomatis saat booking dikonfirmasi).
+5. Untuk mengosongkan data, hapus database `yynnails` lewat phpMyAdmin lalu import ulang. Bersihkan data contoh (pelanggan/booking uji coba) di database sebelum dipakai.
 
 ## Skema Database
 
-Tabel: `admin`, `galeri`, `jadwal`, `layanan`, `login_gagal`, `pelanggan`, `pesanan`.
+Semua tabel ada di satu database `yynnails` dan satu file `database/yynnails.sql`:
+`admin`, `galeri`, `jadwal`, `layanan`, `login_gagal`, `pelanggan`, `pesanan`.
 Relasi: `pesanan.id_pelanggan → pelanggan.id_pelanggan`, `jadwal.id_pesanan → pesanan.id_pesanan`.
 
 ## Catatan

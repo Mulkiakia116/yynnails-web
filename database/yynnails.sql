@@ -16,7 +16,8 @@
 
 
 -- Dumping database structure for yynnails
-DROP DATABASE IF EXISTS `yynnails`;
+-- AMAN di-import berulang: database & data lama TIDAK dihapus.
+-- Tabel dibuat hanya jika belum ada, data awal ditambahkan hanya jika belum ada (INSERT IGNORE).
 CREATE DATABASE IF NOT EXISTS `yynnails` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `yynnails`;
 
@@ -31,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `admin` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table yynnails.admin: ~0 rows (approximately)
-INSERT INTO `admin` (`id_admin`, `username`, `password`, `nama`, `created_at`) VALUES
+INSERT IGNORE INTO `admin` (`id_admin`, `username`, `password`, `nama`, `created_at`) VALUES
 	(1, 'admin', '$2y$10$kDw6rCma4xz0syiHX4KtV.Wdct5LkBH4qt7/rD19e8aZYR821ngpS', 'mulkia', '2026-10-08 01:34:40');
 
 -- Dumping structure for table yynnails.galeri
@@ -47,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `galeri` (
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table yynnails.galeri: ~7 rows (approximately)
-INSERT INTO `galeri` (`id_galeri`, `judul`, `kategori`, `foto`, `deskripsi`, `created_at`, `karya_terbaik`) VALUES
+INSERT IGNORE INTO `galeri` (`id_galeri`, `judul`, `kategori`, `foto`, `deskripsi`, `created_at`, `karya_terbaik`) VALUES
 	(3, 'Brown', 'Nail Art', 'uploads/galeri/eceaeea2cb7a672d0fdb7a2a5c64ddb2.jpg', 'kopi susu', '2026-10-15 18:35:53', 1),
 	(4, 'girls', 'Nail Tip', 'uploads/galeri/029c64a1a14c8f1e99356efd0a9718fe.jpg', 'mewah', '2026-10-15 18:37:21', 1),
 	(5, 'pink', 'Nail Art', 'uploads/galeri/b89cd34f7b536ba3a6a9ba4b411eeb00.jpg', 'cantik', '2026-10-15 18:41:14', 1),
@@ -96,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `layanan` (
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table yynnails.layanan: ~7 rows (approximately)
-INSERT INTO `layanan` (`id_layanan`, `nama_layanan`, `deskripsi`, `harga`, `satuan`, `gambar`, `gambar_harga`, `ikon`, `kategori`, `kelompok`, `urutan`, `tampil_layanan`, `tampil_harga`, `bisa_booking`, `unggulan`, `aktif`, `durasi_menit`) VALUES
+INSERT IGNORE INTO `layanan` (`id_layanan`, `nama_layanan`, `deskripsi`, `harga`, `satuan`, `gambar`, `gambar_harga`, `ikon`, `kategori`, `kelompok`, `urutan`, `tampil_layanan`, `tampil_harga`, `bisa_booking`, `unggulan`, `aktif`, `durasi_menit`) VALUES
 	(1, 'Nail Art', 'Layanan nail art dengan berbagai desain kreatif dan custom sesuai keinginanmu.', 50000.00, '', 'assets/img/nail.jpeg', 'assets/img/art.jpg', '💅🏻', 'nailart', 'utama', 1, 1, 1, 1, 1, 1, 90),
 	(2, 'Press-on Nails', 'Kuku instan dengan desain trendy dan mudah digunakan.', 25000.00, '', 'assets/img/press.jpeg', 'assets/img/on.jpg', '🎀', 'presson', 'utama', 2, 1, 1, 1, 1, 1, 60),
 	(3, 'Nail Tip', 'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.', 100000.00, '', 'assets/img/tip.jpeg', 'assets/img/tip price.jpg', '🍃', 'tip', 'utama', 3, 1, 1, 1, 1, 1, 120),
@@ -128,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table yynnails.pelanggan: ~2 rows (approximately)
-INSERT INTO `pelanggan` (`id_pelanggan`, `nama`, `no_whatsapp`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `pelanggan` (`id_pelanggan`, `nama`, `no_whatsapp`, `created_at`, `updated_at`) VALUES
 	(1, 'Pelanggan Contoh', '081234567890', '2026-10-14 17:34:11', '2026-10-19 05:51:25'),
 	(2, 'cia', '085825280212', '2026-10-25 09:13:45', '2026-10-28 16:03:14');
 
@@ -150,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `pesanan` (
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table yynnails.pesanan: ~15 rows (approximately)
-INSERT INTO `pesanan` (`id_pesanan`, `id_pelanggan`, `kode_booking`, `layanan`, `tanggal`, `jam`, `referensi_design`, `catatan`, `status`, `created_at`) VALUES
+INSERT IGNORE INTO `pesanan` (`id_pesanan`, `id_pelanggan`, `kode_booking`, `layanan`, `tanggal`, `jam`, `referensi_design`, `catatan`, `status`, `created_at`) VALUES
 	(1, 1, 'YN20261015-4AAD20', 'Nail Art', '2026-10-17', '13:00:00', '', 'buat yang bagus kak', 'Dikonfirmasi', '2026-10-14 17:34:11'),
 	(2, 1, 'YN20261015-1C3821', 'Nail Art', '2026-10-30', '15:00:00', '', 'seesuiiin aja kk', 'Ditolak', '2026-10-14 22:32:30'),
 	(3, 1, 'YN20261015-98916E', 'Press-on Nails', '2026-11-13', '16:00:00', '', 'ini kk', 'Dikonfirmasi', '2026-10-14 23:53:45'),
