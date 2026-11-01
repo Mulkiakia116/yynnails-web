@@ -20,6 +20,8 @@ $svc = [
  ['img'=>$I.'press.jpeg','icon'=>'🎀','title'=>'Press-on Nails','text'=>'Kuku instan dengan desain trendy dan mudah digunakan.','label'=>'Mulai dari','price'=>'Rp 25.000','cat'=>'presson','url'=>'booking.php'],
  ['img'=>$I.'tip.jpeg','icon'=>'🍃','title'=>'Nail Tip','text'=>'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.','label'=>'Mulai dari','price'=>'Rp 100.000','cat'=>'tip','url'=>'booking.php'],
  ['img'=>$I.'lash.jpeg','icon'=>'👁','title'=>'Lash Lift','text'=>'Perawatan bulu mata agar terlihat lebih lentik dan natural.','label'=>'Mulai dari','price'=>'Rp 45.000','cat'=>'lash','url'=>'booking.php'],
+ // Manicure: belum ada fotonya, jadi sementara tampil kotak pink bertuliskan "Manicure".
+ // Kalau nanti ada foto, simpan sebagai assets/img/manicure.jpg, otomatis muncul.
  ['img'=>$I.'manicure.jpg','icon'=>'🪷','title'=>'Manicure','text'=>'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.','label'=>'Mulai dari','price'=>'Rp 50.000','cat'=>'mani','url'=>'booking.php'],
  ['img'=>$I.'remov.jpeg','icon'=>'♡','title'=>'Remover Nail Art','text'=>'Layanan penghapusan nail art untuk membantu membersihkan kuku.','label'=>'Mulai dari','price'=>'Rp 3.000','cat'=>'remover','url'=>'booking.php'],
 ];
@@ -96,7 +98,7 @@ return [
   ['type'=>'cards','id'=>'services','style'=>'mini','cols'=>5,'eyebrow'=>'LAYANAN KAMI','title'=>'Our Services','text'=>'Dapatkan perawatan terbaik untuk kuku dan penampilanmu.',
    'link'=>['Lihat Semua Layanan','services.php'],'items'=>array_slice($svc,0,5)],
   ['type'=>'strip','id'=>'gallery','eyebrow'=>'GALERI','title'=>'Hasil Karya Kami','text'=>'Lihat beberapa hasil nail art terbaik dari Yynnails sebagai inspirasi untuk tampilanmu!',
-   'button'=>['Lihat Galeri Lengkap','gallery.php'],'images'=>[$I.'g1.jpg',$I.'g2.jpg',$I.'g3.jpg',$I.'g4.jpg',$I.'g5.jpg']],
+   'button'=>['Lihat Galeri Lengkap','gallery.php']],
   ['type'=>'cards','id'=>'pricelist','style'=>'tile','cols'=>4,'eyebrow'=>'PRICE LIST','title'=>'Daftar Harga','text'=>'Berikut adalah daftar harga untuk beberapa layanan unggulan di Yynnails.',
    'button'=>['Lihat Selengkapnya','pricelist.php'],
    'items'=>[
@@ -165,11 +167,8 @@ return [
    'buttons'=>[['Lihat Semua Foto','#semua']],
 'image'=>$I.'banner galeri.jpeg',],
 
-  ['type'=>'gallery','filter'=>$cats,'items'=>[
-     ['img'=>$I.'g1.jpg','title'=>'Nail Art','count'=>'12 Foto','cat'=>'nailart'],['img'=>$I.'g2.jpg','title'=>'Press-on Nails','count'=>'10 Foto','cat'=>'presson'],
-     ['img'=>$I.'g3.jpg','title'=>'Nail Tips','count'=>'14 Foto','cat'=>'tip'],['img'=>$I.'lash-lift.jpg','title'=>'Lash Lift','count'=>'8 Foto','cat'=>'lash'],
-     ['img'=>$I.'manicure.jpg','title'=>'Manicure','count'=>'9 Foto','cat'=>'mani'],
-     ['img'=>$I.'studio-vibes.jpg','title'=>'Studio Vibes','count'=>'7 Foto','cat'=>'studio'],['img'=>$I.'custom.jpg','title'=>'Custom Design','count'=>'15 Foto','cat'=>'nailart']]],
+  // Isi galeri dibaca dari database (tabel `galeri`), dikelola lewat admin.
+  ['type'=>'gallery','filter'=>$cats],
   ['type'=>'detail','eyebrow'=>'NAIL ART','title'=>'Nail Art Custom','text'=>'Desain nail art yang dapat disesuaikan dengan keinginan pelanggan.',
    'images'=>[$I.'11.jpeg',$I.'22.jpeg',$I.'33.jpeg',$I.'44.jpeg',$I.'55.jpeg',$I.'66.jpeg'],'tags'=>['#NailArt','#Custom'],
    'share'=>[['WA','@wa'],['IG','@ig'],['TT','@tt'],['🔗','@copy']]],
@@ -261,7 +260,7 @@ return [
    'notes'=>['Catatan Tambahan (Opsional)','Contoh: desain khusus, warna, ukuran, atau permintaan lainnya...'],
    'consent'=>'Saya telah membaca dan menyetujui syarat & ketentuan pemesanan dari Yynnails.',
    'btn'=>['Lanjut ke Langkah','Kirim Booking via WhatsApp','‹ Kembali'],
-   'summary'=>['title'=>'Ringkasan Pemesanan','image'=>$I.'summary.jpg','rows'=>[['📅','Tanggal','date'],['🕒','Waktu','time'],['💅','Layanan','service'],['🏷','Estimasi Harga','price']],
+   'summary'=>['title'=>'Ringkasan Pemesanan','image'=>'','rows'=>[['📅','Tanggal','date'],['🕒','Waktu','time'],['💅','Layanan','service'],['🏷','Estimasi Harga','price']],
                'info'=>'Setelah mengisi form, tim Yynnails akan menghubungi kamu melalui WhatsApp untuk konfirmasi jadwal.','script'=>'"See you soon" ♡'],
    'help'=>['Butuh Bantuan?','Hubungi kami via WhatsApp','Chat di WhatsApp'],
 'status_button'=>['Sudah booking?','Cek status pesananmu di sini','Cek Status Booking →']],
@@ -273,8 +272,7 @@ return [
    'tabs'=>['Cek Status Booking','Informasi'],'label'=>'Kode Booking','placeholder'=>'Contoh: YN20250925-001','button'=>'Cek Sekarang',
    'info'=>'Kamu bisa menggunakan kode booking yang sudah diberikan.',
    'notfound'=>'Booking tidak ditemukan. Periksa kembali kode booking kamu.',
-   // contoh data booking — ganti / tambah sesuai kebutuhan (nanti bisa disambungkan ke database)
-   'bookings'=>[['code'=>'YN20250925-001','wa'=>'0858 2528 0212','name'=>'Contoh Pelanggan','service'=>'Nail Art','date'=>'25 September 2025','time'=>'14:00 WITA','status'=>'Dikonfirmasi','note'=>'Sampai jumpa di studio ya ♡']]],
+  ],
   ['type'=>'features','style'=>'bar','items'=>[['🛡','Aman & Terpercaya','Data kamu terlindungi'],['⚡','Proses Cepat','Cek hanya dalam hitungan detik'],['❤','Mudah Digunakan','Tanpa ribet']]],
 ]],
 
