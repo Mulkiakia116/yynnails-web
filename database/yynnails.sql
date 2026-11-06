@@ -18,8 +18,6 @@
 -- Dumping database structure for yynnails
 -- AMAN di-import berulang: database & data lama TIDAK dihapus.
 -- Tabel dibuat hanya jika belum ada, data awal ditambahkan hanya jika belum ada (INSERT IGNORE).
-CREATE DATABASE IF NOT EXISTS `yynnails` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `yynnails`;
 
 -- Dumping structure for table yynnails.admin
 CREATE TABLE IF NOT EXISTS `admin` (
