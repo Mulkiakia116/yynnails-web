@@ -134,7 +134,7 @@ function h($value) {
         <p>Jadwal belum final sampai pihak Yynnails mengonfirmasinya.</p>
         
 <a class="btn"
-   href="https://wa.me/6282319646189?text=Halo%20Yynnails%2C%20saya%20mengirim%20booking%20baru."
+   href="https://wa.me/6285825280212?text=Halo%20Yynnails%2C%20saya%20mengirim%20booking%20baru."
    target="_blank"
    rel="noopener">
    Kirim Booking via WhatsApp
