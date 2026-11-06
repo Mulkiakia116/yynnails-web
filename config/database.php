@@ -1,10 +1,11 @@
 <?php
 
 // Pengaturan bawaan (untuk komputer lokal: Laragon / XAMPP)
-$host = 'localhost';
-$dbname = 'yynnails';
-$username = 'root';
-$password = '';
+$host = getenv('MYSQLHOST') ?: 'localhost';
+$port = getenv('MYSQLPORT') ?: '3306';
+$dbname = getenv('MYSQLDATABASE') ?: 'yynnails';
+$username = getenv('MYSQLUSER') ?: 'root';
+$password = getenv('MYSQLPASSWORD') ?: '';
 
 // Di hosting / server client: buat file config/database.local.php
 // (salin dari database.local.example.php) berisi user & password database
@@ -16,7 +17,7 @@ if (is_file($fileLokal)) {
 
 try {
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4",
         $username,
         $password,
         [
