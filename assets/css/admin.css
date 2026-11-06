@@ -55,7 +55,7 @@ a{color:var(--head);text-decoration:none}
 
 /* ---------- DASHBOARD ---------- */
 .pg-dashboard .layout{display:flex;min-height:100vh}
-.pg-dashboard .sidebar{width:235px;padding:28px 18px;background:var(--card);border-right:1px solid var(--line)}
+.pg-dashboard .sidebar{width:235px;padding:28px 18px;background:var(--card);border-right:1px solid var(--line);position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto}
 .pg-dashboard .brand{display:flex;align-items:center;gap:12px;margin:0 0 35px;color:var(--head);font-size:23px;font-weight:bold;line-height:1.2}
 .pg-dashboard .brand img{display:block;width:44px;height:44px;object-fit:contain;flex-shrink:0}
 .pg-dashboard .nav a{display:block;margin:8px 0;padding:13px;border-radius:9px;color:var(--ink)}
@@ -86,7 +86,7 @@ a{color:var(--head);text-decoration:none}
 }
 @media(max-width:600px){
   .pg-dashboard .layout{display:block}
-  .pg-dashboard .sidebar{width:100%;padding:18px}
+  .pg-dashboard .sidebar{width:100%;padding:18px;position:static;height:auto}
   .pg-dashboard .brand{margin-bottom:15px}
   .pg-dashboard .nav{display:flex;flex-wrap:wrap;gap:5px}
   .pg-dashboard .nav a{margin:0}
@@ -128,3 +128,94 @@ a{color:var(--head);text-decoration:none}
 .pg-form .preview{width:100%;max-height:300px;object-fit:cover;border-radius:10px;margin-top:10px}
 .pg-form .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
 .pg-form form>button.button{margin-top:22px}
+
+/* ---------- NOTIFIKASI (dashboard & kelola layanan) ---------- */
+.alert{margin:0 0 20px;padding:14px 18px;border-radius:10px;font-size:14px}
+.alert.ok{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
+.alert.err{background:var(--err-bg);color:var(--err-ink)}
+
+/* ---------- KELOLA LAYANAN (tabel yang bisa langsung diedit) ---------- */
+.pg-dashboard .edit-table{white-space:normal}
+.pg-dashboard .edit-table td{vertical-align:top}
+.pg-dashboard .edit-table tr.nonaktif{opacity:.6}
+.pg-dashboard .edit-table input[type=number],
+.pg-dashboard .edit-table input[type=text],
+.pg-dashboard .edit-table textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+.pg-dashboard .edit-table input[type=number]{min-width:90px}
+.pg-dashboard .edit-table textarea{min-width:220px;resize:vertical}
+.pg-dashboard .edit-table input:focus,.pg-dashboard .edit-table textarea:focus{outline:0;border-color:var(--head)}
+.pg-dashboard .edit-table td.cek{text-align:center}
+.pg-dashboard .edit-table td.cek input{width:18px;height:18px;accent-color:var(--head)}
+.pg-dashboard .edit-table form{margin:0}
+
+/* Klik menu sidebar 'Layanan & Harga' -> scroll halus ke bagian layanan */
+html{scroll-behavior:smooth}
+#layanan{scroll-margin-top:20px}
+
+/* Header panel Layanan & Harga: judul di kiri, tombol Tambah Layanan di kanan */
+.pg-dashboard .panel-head.head-flex{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.pg-dashboard .panel-head .button{white-space:nowrap;padding:10px 14px;font-size:13px}
+
+/* ==========================================================================
+   EFEK INTERAKTIF: semua kotak & tombol bereaksi saat disentuh / diklik
+   ========================================================================== */
+.button,.pg-dashboard button,.pg-login .submit-btn,.pg-dashboard .logout,.chip,
+.pg-dashboard .nav a,.pg-dashboard .card,.pg-galeri .card,.pg-dashboard .panel,
+.pg-dashboard tbody tr,.back,.pg-form form,.pg-form .box{
+  transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease,color .18s ease}
+
+/* tombol: naik sedikit + bayangan, menekan saat diklik */
+.button:hover,.pg-dashboard button:hover,.pg-login .submit-btn:hover,.pg-dashboard .logout:hover{
+  transform:translateY(-2px);box-shadow:0 6px 14px rgba(212,112,140,.28)}
+.button:active,.pg-dashboard button:active,.pg-login .submit-btn:active,.pg-dashboard .logout:active{
+  transform:translateY(0) scale(.97);box-shadow:none}
+.button.soft:hover,.pg-dashboard .logout:hover{background:var(--soft);border-color:var(--head)}
+.button.danger:hover,.pg-dashboard button.danger:hover{background:#b23a52;color:#fff}
+.pg-dashboard button.danger{background:var(--danger);color:#fff}
+.button.mini{padding:8px 10px;font-size:13px;margin-bottom:6px}
+.chip:hover{background:var(--btn);transform:scale(1.05)}
+
+/* fokus keyboard terlihat jelas */
+.button:focus-visible,.pg-dashboard button:focus-visible,.pg-dashboard a:focus-visible,.pg-login .submit-btn:focus-visible{
+  outline:3px solid rgba(194,91,122,.45);outline-offset:2px}
+
+/* menu samping: geser sedikit ke kanan */
+.pg-dashboard .nav a:hover{transform:translateX(4px)}
+
+/* kotak statistik (bisa diklik untuk memfilter booking) */
+.pg-dashboard a.card.stat{display:block;color:inherit;cursor:pointer}
+.pg-dashboard a.card.stat:hover{transform:translateY(-5px);box-shadow:0 12px 26px rgba(212,112,140,.22);border-color:var(--head)}
+.pg-dashboard a.card.stat:active{transform:translateY(-1px) scale(.98)}
+.pg-dashboard a.card.stat.active{background:var(--soft);border-color:var(--head);box-shadow:0 0 0 2px var(--head) inset}
+.pg-dashboard a.card.stat.active p{color:var(--head);font-weight:600}
+
+/* kotak lain: angkat halus */
+.pg-galeri .card:hover{transform:translateY(-5px);box-shadow:0 12px 26px rgba(212,112,140,.2);border-color:var(--head)}
+.pg-galeri .card img{transition:transform .35s ease}
+.pg-galeri .card:hover img{transform:scale(1.05)}
+.pg-galeri .card{overflow:hidden}
+.pg-dashboard .panel:hover{box-shadow:0 8px 22px rgba(212,112,140,.12)}
+.pg-dashboard tbody tr:hover{background:#fff9fb}
+.pg-form form:hover,.pg-form .box:hover{box-shadow:0 8px 22px rgba(212,112,140,.12)}
+.pg-form input:focus,.pg-form select:focus,.pg-form textarea:focus,
+.pg-login input:focus{box-shadow:0 0 0 3px rgba(194,91,122,.15)}
+.pg-dashboard .status{transition:transform .18s ease}
+.pg-dashboard tbody tr:hover .status{transform:scale(1.06)}
+
+/* ---------- pager & zona reset ---------- */
+.pg-dashboard .pager{display:flex;justify-content:center;align-items:center;gap:16px;padding:16px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.pg-dashboard .pager a{padding:8px 12px;border:1px solid var(--line);border-radius:9px;transition:all .18s ease}
+.pg-dashboard .pager a:hover{background:var(--soft);border-color:var(--head);transform:translateY(-2px)}
+.pg-dashboard .danger-zone{border-color:#f0b4c0}
+.pg-dashboard .danger-zone .panel-head{background:#fff0f3}
+.pg-dashboard .reset-form{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:20px}
+.pg-dashboard .reset-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink)}
+.pg-dashboard .reset-form input{padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;min-width:200px}
+.pg-dashboard .reset-form input:focus{outline:0;border-color:var(--danger);box-shadow:0 0 0 3px rgba(201,69,95,.15)}
+.pg-dashboard .edit-table .inline-form{margin:0 4px 6px 0}
+.pg-dashboard .edit-table a.button.mini{display:inline-block;vertical-align:top}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+  .button:hover,.pg-dashboard button:hover,.pg-dashboard a.card.stat:hover,.pg-galeri .card:hover{transform:none}
+}

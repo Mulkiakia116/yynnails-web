@@ -13,7 +13,8 @@ return [
 'site' => 'Yynnails',
 
 'nav' => [
-    ['Dashboard',     'dashboard.php', 'dashboard'],
+    ['Dashboard',        'dashboard.php',          'dashboard'],
+    ['Layanan & Harga',  'dashboard.php#layanan',  ''],
     ['Galeri Karya',  'galeri.php',    'galeri'],
     ['Lihat Website', '../index.php',  ''],
 ],
@@ -41,6 +42,14 @@ return [
         'title' => 'Tambah Karya', 'body' => 'pg-form',
         'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
     ],
+    'tambah_layanan' => [
+        'title' => 'Tambah Layanan', 'body' => 'pg-form',
+        'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
+    ],
+    'edit_layanan' => [
+        'title' => 'Edit Layanan', 'body' => 'pg-form',
+        'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
+    ],
     'edit_galeri' => [
         'title' => 'Edit Karya', 'body' => 'pg-form',
         'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
@@ -54,6 +63,11 @@ return [
 'actions' => [
     'simpan_galeri' => ['auth' => true],
     'update_galeri' => ['auth' => true],
+    'update_layanan' => ['auth' => true],
+    'simpan_layanan' => ['auth' => true],
+    'ubah_layanan'  => ['auth' => true],
+    'hapus_layanan' => ['auth' => true],
+    'reset_booking' => ['auth' => true],
     'hapus_galeri'  => ['auth' => true],
     'proses_status' => ['auth' => true],
     'logout'        => ['auth' => false],

@@ -6,41 +6,7 @@
   // menu mobile
   $('.burger')?.addEventListener('click', () => $('.top').classList.toggle('open'));
 
-  // Navigasi aktif saat scroll
-  const navLinks = $$('.top nav a[data-nav]');
-  const sections = navLinks
-    .map(link => document.getElementById(link.dataset.nav))
-    .filter(Boolean);
-
-  const setActive = id => {
-    navLinks.forEach(link => {
-      const active = link.dataset.nav === id;
-      link.classList.toggle('on', active);
-
-      if (active) {
-        link.setAttribute('aria-current', 'location');
-      } else {
-        link.removeAttribute('aria-current');
-      }
-    });
-  };
-
-  if (sections.length) {
-    const observer = new IntersectionObserver(entries => {
-      const visible = entries
-        .filter(entry => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-
-      if (visible.length) {
-        setActive(visible[0].target.id);
-      }
-    }, {
-      rootMargin: '-100px 0px -55% 0px',
-      threshold: [0, 0.1, 0.25, 0.5]
-    });
-
-    sections.forEach(section => observer.observe(section));
-  }
+  // Menu aktif ditentukan server (includes/navbar.php), jadi tidak perlu scroll-spy
 
   // filter kategori (kartu layanan & galeri)
   $$('[data-filter-scope]').forEach(sc => $$('.chip', sc).forEach(c => c.onclick = () => {

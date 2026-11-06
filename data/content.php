@@ -50,11 +50,11 @@ return [
 
 'nav' => [
   ['Home', 'index.php'],
-  ['About', 'index.php#about'],
-  ['Services', 'index.php#services'],
-  ['Gallery', 'index.php#gallery'],
-  ['Price List', 'index.php#pricelist'],
-  ['Contact', 'index.php#contact']
+  ['About', 'about.php'],
+  ['Services', 'services.php'],
+  ['Gallery', 'gallery.php'],
+  ['Price List', 'pricelist.php'],
+  ['Contact', 'contact.php']
 ],
 'cta_nav' => ['Booking Sekarang', 'booking.php'],
 

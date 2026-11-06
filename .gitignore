@@ -6,3 +6,5 @@ uploads/referensi/*
 Thumbs.db
 *.log
 .vscode/
+# password database server (jangan pernah di-commit)
+config/database.local.php

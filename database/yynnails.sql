@@ -145,10 +145,23 @@ CREATE TABLE IF NOT EXISTS `pesanan` (
   `catatan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN ('Menunggu Konfirmasi','Dikonfirmasi'), CONCAT(`tanggal`,' ',`jam`), NULL)) STORED,
   PRIMARY KEY (`id_pesanan`),
+  UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`),
   KEY `id_pelanggan` (`id_pelanggan`),
   CONSTRAINT `pesanan_ibfk_1` FOREIGN KEY (`id_pelanggan`) REFERENCES `pelanggan` (`id_pelanggan`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Migrasi untuk database lama: cegah dua booking aktif di tanggal + jam yang sama.
+-- Aman di-import berulang kali (dilewati kalau kolom sudah ada).
+SET @ada_slot := (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pesanan' AND COLUMN_NAME = 'slot_aktif');
+SET @sql_slot := IF(@ada_slot = 0,
+  'ALTER TABLE `pesanan` ADD COLUMN `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN (''Menunggu Konfirmasi'',''Dikonfirmasi''), CONCAT(`tanggal`,'' '',`jam`), NULL)) STORED, ADD UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`)',
+  'DO 0');
+PREPARE stmt_slot FROM @sql_slot;
+EXECUTE stmt_slot;
+DEALLOCATE PREPARE stmt_slot;
 
 -- Dumping data for table yynnails.pesanan: ~15 rows (approximately)
 INSERT IGNORE INTO `pesanan` (`id_pesanan`, `id_pelanggan`, `kode_booking`, `layanan`, `tanggal`, `jam`, `referensi_design`, `catatan`, `status`, `created_at`) VALUES

@@ -80,7 +80,7 @@ function layanan_items(string $sumber): array {
       if ((int) $r['tampil_harga'] !== 1) continue;
       if ($r['kelompok'] !== ($sumber === 'harga_utama' ? 'utama' : 'lainnya')) continue;
       $o[] = ['img' => ($r['gambar_harga'] ?: $r['gambar']), 'title' => $r['nama_layanan'],
-              'text' => $r['deskripsi'], 'price' => 'Mulai dari ' . $teks, 'url' => 'booking.php'];
+              'text' => $r['deskripsi'], 'label' => 'Mulai dari', 'price' => $teks, 'url' => 'booking.php'];
     }
   }
   if ($sumber === 'beranda_layanan') $o = array_slice($o, 0, 5);

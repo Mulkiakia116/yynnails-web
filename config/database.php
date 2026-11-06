@@ -1,4 +1,3 @@
-
 <?php
 
 // Pengaturan bawaan (untuk komputer lokal: Laragon / XAMPP)

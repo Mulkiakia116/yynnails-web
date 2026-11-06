@@ -138,6 +138,7 @@ if (
 
 try {
     $pdo->beginTransaction();
+
     // Anti-spam: satu nomor WhatsApp maksimal 3 booking yang masih menunggu konfirmasi
     $batasMenunggu = 3;
     $cekMenunggu = $pdo->prepare(
@@ -160,45 +161,46 @@ try {
     }
 
     // Pembatasan kuota harian untuk layanan tertentu
-// Aturan kuota (layanan & batas per hari) diatur di data/content.php -> 'kuota'
-$aturanKuota = (function () {
-    $C = require __DIR__ . '/../data/content.php';
-    return $C['kuota'];
-})();
-$layananTerbatas = $aturanKuota['layanan'];
-$batasHarian = (int) $aturanKuota['batas_harian'];
+    // Aturan kuota (layanan & batas per hari) diatur di data/content.php -> 'kuota'
+    $aturanKuota = (function () {
+        $C = require __DIR__ . '/../data/content.php';
+        return $C['kuota'];
+    })();
+    $layananTerbatas = $aturanKuota['layanan'];
+    $batasHarian = (int) $aturanKuota['batas_harian'];
 
-if (in_array($layanan, $layananTerbatas, true)) {
-    $tandaTanya = implode(', ', array_fill(0, count($layananTerbatas), '?'));
-    $cekKuota = $pdo->prepare(
-        "SELECT COUNT(*) FROM pesanan
-         WHERE tanggal = ?
-           AND layanan IN ($tandaTanya)
-           AND status IN ('Menunggu Konfirmasi', 'Dikonfirmasi', 'Selesai')
-         FOR UPDATE"
-    );
-    $cekKuota->execute([$tanggal, ...$layananTerbatas]);
+    if (in_array($layanan, $layananTerbatas, true)) {
+        $tandaTanya = implode(', ', array_fill(0, count($layananTerbatas), '?'));
+        $cekKuota = $pdo->prepare(
+            "SELECT COUNT(*) FROM pesanan
+             WHERE tanggal = ?
+               AND layanan IN ($tandaTanya)
+               AND status IN ('Menunggu Konfirmasi', 'Dikonfirmasi', 'Selesai')
+             FOR UPDATE"
+        );
+        $cekKuota->execute([$tanggal, ...$layananTerbatas]);
 
-    if ((int) $cekKuota->fetchColumn() >= $batasHarian) {
-        $pdo->rollBack();
-        buang_referensi($referensi);
-        // Isian disimpan sementara di session supaya form bisa terisi lagi
-        // waktu pelanggan memilih tanggal lain (foto tidak bisa diisi ulang).
-        $_SESSION['kuota_penuh'] = [
-            'layanan' => $layanan,
-            'tanggal' => $tanggal,
-            'form' => [
-                'nama'    => $nama,
-                'wa'      => $wa,
+        if ((int) $cekKuota->fetchColumn() >= $batasHarian) {
+            $pdo->rollBack();
+            buang_referensi($referensi);
+            // Isian disimpan sementara di session supaya form bisa terisi lagi
+            // waktu pelanggan memilih tanggal lain (foto tidak bisa diisi ulang).
+            $_SESSION['kuota_penuh'] = [
                 'layanan' => $layanan,
-                'jam'     => $jam,
-                'catatan' => $catatan,
-            ],
-        ];
-        header('Location: ../kuota_penuh.php');
-        exit;
+                'tanggal' => $tanggal,
+                'form' => [
+                    'nama'    => $nama,
+                    'wa'      => $wa,
+                    'layanan' => $layanan,
+                    'jam'     => $jam,
+                    'catatan' => $catatan,
+                ],
+            ];
+            header('Location: ../kuota_penuh.php');
+            exit;
+        }
     }
-}
+
     $cekJadwal = $pdo->prepare(
         "SELECT COUNT(*) FROM pesanan
          WHERE tanggal = :tanggal
@@ -249,27 +251,25 @@ if (in_array($layanan, $layananTerbatas, true)) {
         $idPelanggan = $pdo->lastInsertId();
     }
 
-    
-$tambahPesanan = $pdo->prepare(
-    'INSERT INTO pesanan
-    (id_pelanggan, kode_booking, layanan, tanggal, jam,
-     referensi_design, catatan, status)
-    VALUES
-    (:id_pelanggan, :kode, :layanan, :tanggal, :jam,
-     :referensi, :catatan, :status)'
-);
+    $tambahPesanan = $pdo->prepare(
+        'INSERT INTO pesanan
+        (id_pelanggan, kode_booking, layanan, tanggal, jam,
+         referensi_design, catatan, status)
+        VALUES
+        (:id_pelanggan, :kode, :layanan, :tanggal, :jam,
+         :referensi, :catatan, :status)'
+    );
 
-$tambahPesanan->execute([
-    'id_pelanggan' => $idPelanggan,
-    'kode' => $kodeBooking,
-    'layanan' => $layanan,
-    'tanggal' => $tanggal,
-    'jam' => $jam,
-    'referensi' => $referensi,
-    'catatan' => $catatan,
-    'status' => 'Menunggu Konfirmasi'
-]);
-
+    $tambahPesanan->execute([
+        'id_pelanggan' => $idPelanggan,
+        'kode' => $kodeBooking,
+        'layanan' => $layanan,
+        'tanggal' => $tanggal,
+        'jam' => $jam,
+        'referensi' => $referensi,
+        'catatan' => $catatan,
+        'status' => 'Menunggu Konfirmasi'
+    ]);
 
     $pdo->commit();
 
@@ -283,12 +283,21 @@ $tambahPesanan->execute([
 
     header('Location: ../pages/booking_berhasil.php');
     exit;
-
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
     buang_referensi($referensi);
+
+    // Dua orang booking jadwal yang sama di detik yang sama: yang kedua ditolak oleh
+    // unique index `uniq_slot_aktif` di tabel pesanan (lihat database/yynnails.sql).
+    if (
+        $e instanceof PDOException &&
+        (int) ($e->errorInfo[1] ?? 0) === 1062 &&
+        str_contains($e->getMessage(), 'uniq_slot_aktif')
+    ) {
+        exit('Maaf, jadwal tersebut baru saja dipesan orang lain. Silakan pilih waktu lain.');
+    }
 
     error_log($e->getMessage());
     http_response_code(500);

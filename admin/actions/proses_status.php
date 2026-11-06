@@ -3,14 +3,28 @@
    Dipanggil lewat run_action('proses_status') dari admin/proses_status.php.
    Variabel tersedia: $A (konten), $pdo (database). */
 
+// Kembali ke dashboard sambil mempertahankan filter status & halaman yang sedang dibuka
+function kembali_status(string $pesan): void {
+    $q = ['pesan' => $pesan];
+    $f = (string) ($_POST['filter'] ?? '');
+    if (in_array($f, ['menunggu', 'dikonfirmasi', 'selesai'], true)) {
+        $q['status'] = $f;
+    }
+    $h = filter_var($_POST['hal'] ?? '', FILTER_VALIDATE_INT);
+    if ($h && $h > 1) {
+        $q['hal'] = $h;
+    }
+    header('Location: dashboard.php?' . http_build_query($q) . '#booking');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: dashboard.php');
     exit;
 }
 
 if (!csrf_valid($_POST['csrf_token'] ?? '')) {
-    header('Location: dashboard.php?pesan=csrf');
-    exit;
+    kembali_status('csrf');
 }
 
 $kode = trim($_POST['kode_booking'] ?? '');
@@ -19,11 +33,17 @@ $aksi = $_POST['aksi'] ?? '';
 $statusBaru = [
     'konfirmasi' => 'Dikonfirmasi',
     'tolak' => 'Ditolak',
+    'selesai' => 'Selesai',
+];
+// Status yang harus dimiliki booking sebelum aksi boleh dijalankan
+$statusSebelum = [
+    'konfirmasi' => 'Menunggu Konfirmasi',
+    'tolak' => 'Menunggu Konfirmasi',
+    'selesai' => 'Dikonfirmasi',
 ];
 
 if ($kode === '' || !isset($statusBaru[$aksi])) {
-    header('Location: dashboard.php?pesan=tidak_valid');
-    exit;
+    kembali_status('tidak_valid');
 }
 
 /* Saat booking dikonfirmasi, catat ke tabel `jadwal`:
@@ -80,20 +100,23 @@ try {
     $stmt->execute([
         'status' => $statusBaru[$aksi],
         'kode' => $kode,
-        'status_lama' => 'Menunggu Konfirmasi',
+        'status_lama' => $statusSebelum[$aksi],
     ]);
 
     if ($stmt->rowCount() > 0) {
         if ($aksi === 'konfirmasi') {
             catat_jadwal($pdo, $kode);
+        } elseif ($aksi === 'selesai') {
+            $pdo->prepare(
+                "UPDATE jadwal SET status = 'Selesai'
+                 WHERE id_pesanan = (SELECT id_pesanan FROM pesanan WHERE kode_booking = :kode)"
+            )->execute(['kode' => $kode]);
         }
-        header('Location: dashboard.php?pesan=berhasil');
+        kembali_status('berhasil');
     } else {
-        header('Location: dashboard.php?pesan=tidak_diubah');
+        kembali_status('tidak_diubah');
     }
-    exit;
 } catch (Throwable $e) {
     error_log($e->getMessage());
-    header('Location: dashboard.php?pesan=gagal');
-    exit;
+    kembali_status('gagal');
 }

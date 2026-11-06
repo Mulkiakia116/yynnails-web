@@ -98,3 +98,11 @@ Relasi: `pesanan.id_pelanggan â†’ pelanggan.id_pelanggan`, `jadwal.id_pesanan â†
 - Teks dan gambar halaman publik diatur di `data/content.php`.
 - **Layanan & harga dibaca dari tabel `layanan` di database** (Home, Services, Price List, form Booking, dan validasi booking). Ubah harga lewat phpMyAdmin, tampilan web ikut berubah.
 - Folder `uploads/referensi/` berisi data pelanggan dan tidak ikut di-commit ke Git (lihat `.gitignore`).
+
+## Fitur Dashboard Admin
+
+- **Kotak statistik bisa diklik**: Total Booking, Menunggu Konfirmasi, Dikonfirmasi, dan Selesai memfilter tabel booking (`dashboard.php?status=...`). Tabel dibagi per 10 booking per halaman.
+- **Tandai Selesai**: booking berstatus Dikonfirmasi punya tombol "Tandai Selesai".
+- **Edit & Hapus Layanan**: tombol **Edit** membuka form lengkap (nama, ikon, foto, harga, dll.). Mengganti nama ikut memperbarui riwayat booking dan kategori galeri. Layanan yang masih punya booking aktif tidak bisa dihapus (nonaktifkan saja).
+- **Reset Riwayat Booking** (bagian paling bawah dashboard): menghapus semua booking, jadwal, foto referensi, dan data pelanggan. Wajib mengetik `RESET` dan password admin. Layanan, galeri, dan akun admin tidak ikut terhapus.
+- Semua kotak dan tombol punya efek hover/klik (admin dan situs publik).

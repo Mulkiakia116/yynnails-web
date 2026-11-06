@@ -85,8 +85,8 @@ small{color:var(--mut);font-size:12px}.inl small,.fbar small,.fcards small{displ
 .k-mini .cb{padding:24px 14px 12px}.k-mini .cb p{display:none}.k-mini h3{font:500 15px Poppins}
 .k-tile .card{text-align:center;padding:16px}.k-tile .cb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px}.k-tile .cf{flex-direction:column;gap:0}.k-tile .go{display:none}.k-tile .pr{margin:0}
 .k-gal .card{aspect-ratio:1/1.05}.k-gal .card>img,.k-gal .card>.ph{position:absolute;inset:0}
-.cap{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(transparent,rgba(60,30,45,.78));color:#fff}
-.cap h3{font:500 16px Poppins}.cap small{color:#ffe3ee}
+.cap{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 12px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(255,226,236,0),rgba(255,226,236,.96) 38%,#ffd9e6);color:#5a2a40}
+.cap h3{font:600 16px Poppins;color:#5a2a40}.cap small{color:#b34d78;font-weight:500}.cap p{color:#6b4455;margin:4px 0 0}
 
 /* detail, strip, steps, cta */
 .detail{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;align-items:center}
@@ -477,3 +477,60 @@ img,iframe,video{max-width:100%}
 .kp .note{text-align:left;margin-top:0}
 .kp .btns{flex-direction:column;align-items:stretch;margin:22px 0 0}
 .kp .btn{justify-content:center}
+/* ==========================================================================
+   EFEK INTERAKTIF situs publik: kotak & tombol bereaksi saat disentuh
+   ========================================================================== */
+.btn,.chip,.card,.box,.sq,.soc a,.go,.tag{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(212,112,140,.28)}
+.btn:active{transform:translateY(0) scale(.97);box-shadow:none}
+.chip:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 6px 14px rgba(212,112,140,.22)}
+.chip:active{transform:scale(.96)}
+.card:hover{transform:translateY(-6px);box-shadow:0 14px 28px rgba(212,112,140,.22)}
+/* zoom foto hanya di galeri; kartu layanan TIDAK boleh overflow:hidden karena ikon bulatnya menonjol keluar dari foto */
+.k-gal .card .cimg{overflow:hidden}
+.k-gal .card .cimg img{transition:transform .4s ease}
+.k-gal .card:hover .cimg img{transform:scale(1.06)}
+
+/* Kartu layanan: "Mulai dari" di atas, harga + tombol panah di bawahnya; harga panjang boleh turun baris */
+.k-service .cf,.k-mini .cf{flex-wrap:wrap;row-gap:4px}
+.k-service .cf small,.k-mini .cf small{flex-basis:100%;white-space:nowrap}
+.k-service .cf .pr,.k-mini .cf .pr{flex:1 1 0;min-width:0;white-space:normal;line-height:1.3}
+.box:hover{box-shadow:0 10px 24px rgba(212,112,140,.15)}
+.sq:hover,.soc a:hover,.go:hover{transform:translateY(-3px) scale(1.08)}
+.sq:active,.soc a:active,.go:active{transform:scale(.94)}
+.btn:focus-visible,.chip:focus-visible,.sq:focus-visible,.go:focus-visible{outline:3px solid rgba(194,91,122,.45);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .btn:hover,.chip:hover,.card:hover,.sq:hover,.soc a:hover,.go:hover{transform:none}
+  *{transition:none!important}
+}
+
+/* Booking: form + kotak bantuan + cek status ditumpuk di kolom kiri */
+.bk-main{display:flex;flex-direction:column;gap:24px;min-width:0}
+.bk-main .bk-extra{margin:0}
+.bk-main .bk-extra h3{margin-top:0}
+.bk-main .bk-extra .btn{margin-top:4px}
+
+/* Price List (kartu foto): "Mulai dari" di atas, pill harga + panah sejajar di bawah.
+   Harga selalu satu baris, dan bagian harga menempel di dasar kartu supaya tinggi & posisinya seragam. */
+.k-price .cb,.k-photo .cb{display:flex;flex-direction:column}
+.k-price .cb p,.k-photo .cb p{margin-bottom:12px}
+.k-price .cf,.k-photo .cf{margin-top:auto;flex-wrap:wrap;row-gap:4px}
+.k-price .cf small,.k-photo .cf small{flex-basis:100%}
+.k-price .pill,.k-photo .pill{white-space:nowrap;margin-right:auto}
+
+/* Price List: tinggi semua kartu seragam, tidak ikut rasio foto */
+.k-price{grid-auto-rows:1fr}
+.k-price .card{min-height:210px}
+.k-price .cimg img,.k-price .cimg .ph{position:absolute;inset:0;width:100%;height:100%;min-height:0;object-fit:cover}
+
+/* Price List: baris terakhir yang tidak penuh dibuat rata tengah (sisa 1 atau 2 kartu) */
+@media (min-width:861px){
+  .k-price,.k-photo{grid-template-columns:repeat(6,1fr)}
+  .k-price .card,.k-photo .card{grid-column:span 2}
+  .k-price .card:last-child:nth-child(3n+1),.k-photo .card:last-child:nth-child(3n+1){grid-column:3 / span 2}
+  .k-price .card:nth-last-child(2):nth-child(3n+1),.k-photo .card:nth-last-child(2):nth-child(3n+1){grid-column:2 / span 2}
+  .k-price .card:last-child:nth-child(3n+2),.k-photo .card:last-child:nth-child(3n+2){grid-column:4 / span 2}
+}
+@media (min-width:561px) and (max-width:860px){
+  .k-price .card:last-child:nth-child(odd),.k-photo .card:last-child:nth-child(odd){grid-column:1 / -1;width:calc(50% - 9px);justify-self:center}
+}

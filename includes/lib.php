@@ -387,7 +387,7 @@ function s_booking($s){
   global $isiForm;
   $P = $s['panes']; $sm = $s['summary']; $b = $s['btn'];
   
-echo '<section class="sec"><div class="wrap bk"><form class="box" id="bk" method="post" action="actions/proses_booking.php" enctype="multipart/form-data">';
+echo '<section class="sec"><div class="wrap bk"><div class="bk-main"><form class="box" id="bk" method="post" action="actions/proses_booking.php" enctype="multipart/form-data">';
   if (!empty($isiForm)) {
     echo '<p class="note">✨ Datamu sudah terisi kembali. Tinggal pilih <b>tanggal lain</b>, dan unggah ulang foto referensi kalau ada.</p>';
   }
@@ -413,24 +413,25 @@ echo '<div class="pane"><h3>'.e($P[3][0]).'</h3><p class="mut">'.e($P[3][1]).'</
   echo '<div class="bnav"><button type="button" class="btn ghost" id="prev" hidden>'.e($b[2]).'</button><button type="button" class="btn primary" id="next" data-next="'.e($b[0]).'" data-send="'.e($b[1]).'">'.e($b[0]).' 2 →</button></div></form>';
  
 
-echo '<aside><div class="box"><h3>'.e($sm['title']).'</h3><div class="sumimg" style="position:relative;overflow:hidden;">'.img($sm['image'], 'Yynnails').'<div id="summary-reference" style="position:absolute;inset:0;display:none;background:#1b0d15;padding:12px;box-sizing:border-box;"><img id="summary-reference-img" alt="Referensi desain pelanggan" style="width:100%;height:100%;object-fit:contain;border-radius:10px;"></div></div><ul class="sum">';
-
-
-  foreach ($sm['rows'] as $r) echo '<li><span class="ic">'.e($r[0]).'</span><div><small>'.e($r[1]).'</small><b data-s="'.e($r[2]).'">-</b></div></li>';
-
-echo '</ul><p class="note">ⓘ '.e($sm['info']).'</p><p class="script">'.e($sm['script']).'</p></div>'
-     . '<div class="box" style="margin-top:18px"><h3>'.e($s['help'][0]).'</h3><p>'.e($s['help'][1]).'</p>'.btn([$s['help'][2], '@wa']).'</div>';
+// Kotak bantuan & cek status ditaruh di bawah form (kolom kiri), supaya tidak ada ruang kosong
+echo '<div class="box bk-extra"><h3>'.e($s['help'][0]).'</h3><p>'.e($s['help'][1]).'</p>'.btn([$s['help'][2], '@wa']).'</div>';
 
 if (!empty($s['status_button'])) {
-    echo '<div class="box" style="margin-top:18px">'
+    echo '<div class="box bk-extra">'
        . '<h3>'.e($s['status_button'][0]).'</h3>'
        . '<p>'.e($s['status_button'][1]).'</p>'
        . '<a class="btn primary wide" href="status.php">'
        . e($s['status_button'][2])
        . '</a></div>';
 }
+echo '</div>';   // tutup .bk-main
 
-echo '</aside></div></section>';
+echo '<aside><div class="box"><h3>'.e($sm['title']).'</h3><div class="sumimg" style="position:relative;overflow:hidden;">'.img($sm['image'], 'Yynnails').'<div id="summary-reference" style="position:absolute;inset:0;display:none;background:#1b0d15;padding:12px;box-sizing:border-box;"><img id="summary-reference-img" alt="Referensi desain pelanggan" style="width:100%;height:100%;object-fit:contain;border-radius:10px;"></div></div><ul class="sum">';
+
+
+  foreach ($sm['rows'] as $r) echo '<li><span class="ic">'.e($r[0]).'</span><div><small>'.e($r[1]).'</small><b data-s="'.e($r[2]).'">-</b></div></li>';
+
+echo '</ul><p class="note">ⓘ '.e($sm['info']).'</p><p class="script">'.e($sm['script']).'</p></div></aside></div></section>';
 
 // Isi ulang form dari halaman "Kuota Penuh" (tanggal sengaja dikosongkan)
 if (!empty($isiForm)) {
