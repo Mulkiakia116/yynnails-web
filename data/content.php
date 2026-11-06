@@ -26,7 +26,7 @@ return [
     'copyright' => '© 2026 Yynnails. All rights reserved.',
     'footer_note' => 'Nails make everything better ♡',
 
-    'wa' => '6282319646189',
+    'wa' => '628582580212',
     'wa_label' => '082319646189',
 
     'ig' => 'https://www.instagram.com/yynnails/',
