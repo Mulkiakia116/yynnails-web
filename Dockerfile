@@ -1,25 +1,21 @@
 FROM php:8.3-apache
 
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
+RUN docker-php-ext-install pdo_mysql \
+ && a2dismod -f mpm_event mpm_worker || true \
  && a2enmod mpm_prefork rewrite \
- && docker-php-ext-install pdo_mysql \
  && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Default PHP hanya mengizinkan upload 2 MB, padahal foto HP biasanya 3-10 MB.
-# Batas dinaikkan supaya sesuai dengan batas 5 MB di actions/proses_booking.php.
-RUN { \
-    echo "file_uploads = On"; \
-    echo "upload_max_filesize = 6M"; \
-    echo "post_max_size = 8M"; \
-    echo "memory_limit = 128M"; \
-    echo "max_file_uploads = 5"; \
- } > /usr/local/etc/php/conf.d/uploads.ini
+# Port diambil dari variabel PORT milik Railway (default 80 kalau dijalankan lokal)
+ENV PORT=80
+RUN sed -i 's/^Listen 80$/Listen ${PORT}/' /etc/apache2/ports.conf \
+ && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/' /etc/apache2/sites-available/000-default.conf
 
 COPY . /var/www/html/
 
-# Apache berjalan sebagai www-data, jadi folder upload harus miliknya agar bisa ditulis
-RUN mkdir -p /var/www/html/uploads/referensi /var/www/html/uploads/galeri /var/www/html/uploads/layanan \
- && chown -R www-data:www-data /var/www/html/uploads \
- && chmod -R 775 /var/www/html/uploads
+# Batas upload PHP bawaan cuma 2 MB, dinaikkan agar foto HP bisa masuk
+RUN printf "upload_max_filesize=6M\npost_max_size=8M\n" > /usr/local/etc/php/conf.d/uploads.ini \
+ && mkdir -p /var/www/html/uploads/referensi /var/www/html/uploads/galeri /var/www/html/uploads/layanan \
+ && chown -R www-data:www-data /var/www/html/uploads
 
-CMD sed -i "s/80/${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && docker-php-entrypoint apache2-foreground
+# Pastikan hanya satu MPM aktif setiap container start, lalu jalankan Apache
+CMD a2dismod -f mpm_event mpm_worker >/dev/null 2>&1; a2enmod mpm_prefork >/dev/null 2>&1; exec docker-php-entrypoint apache2-foreground
