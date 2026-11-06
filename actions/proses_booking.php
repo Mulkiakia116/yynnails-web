@@ -97,7 +97,12 @@ if (
     isset($_FILES['referensi']) &&
     $_FILES['referensi']['error'] !== UPLOAD_ERR_NO_FILE
 ) {
-    if ($_FILES['referensi']['error'] !== UPLOAD_ERR_OK) {
+    $errUpload = $_FILES['referensi']['error'];
+    if ($errUpload === UPLOAD_ERR_INI_SIZE || $errUpload === UPLOAD_ERR_FORM_SIZE) {
+        exit('Ukuran foto terlalu besar. Maksimal 5 MB, silakan pilih foto yang lebih kecil.');
+    }
+    if ($errUpload !== UPLOAD_ERR_OK) {
+        error_log('Upload referensi gagal, kode error PHP: ' . $errUpload);
         exit('Foto gagal diunggah. Silakan coba kembali.');
     }
 
