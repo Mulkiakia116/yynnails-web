@@ -18,4 +18,7 @@ RUN printf "upload_max_filesize=6M\npost_max_size=8M\n" > /usr/local/etc/php/con
  && chown -R www-data:www-data /var/www/html/uploads
 
 # Pastikan hanya satu MPM aktif setiap container start, lalu jalankan Apache
-CMD a2dismod -f mpm_event mpm_worker >/dev/null 2>&1; a2enmod mpm_prefork >/dev/null 2>&1; exec docker-php-entrypoint apache2-foreground
+CMD mkdir -p /var/www/html/uploads/galeri /var/www/html/uploads/layanan /var/www/html/uploads/referensi \
+ && chown -R www-data:www-data /var/www/html/uploads \
+ && sed -i "s/80/${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf \
+ && docker-php-entrypoint apache2-foreground
