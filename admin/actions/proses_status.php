@@ -5,9 +5,19 @@
 
 // Kembali ke dashboard sambil mempertahankan filter status & halaman yang sedang dibuka
 function kembali_status(string $pesan): void {
+    // Aksi dari menu Jadwal: kembali ke tanggal yang sedang dibuka
+    if (($_POST['dari'] ?? '') === 'jadwal') {
+        $tgl = (string) ($_POST['tanggal'] ?? '');
+        $q = ['pesan' => $pesan];
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tgl)) {
+            $q['tanggal'] = $tgl;
+        }
+        header('Location: jadwal.php?' . http_build_query($q) . '#harian');
+        exit;
+    }
     $q = ['pesan' => $pesan];
     $f = (string) ($_POST['filter'] ?? '');
-    if (in_array($f, ['menunggu', 'dikonfirmasi', 'selesai'], true)) {
+    if (in_array($f, ['menunggu', 'dikonfirmasi', 'selesai', 'ditolak', 'kedaluwarsa', 'tidak_hadir', 'tindak_lanjut'], true)) {
         $q['status'] = $f;
     }
     $h = filter_var($_POST['hal'] ?? '', FILTER_VALIDATE_INT);
@@ -34,16 +44,36 @@ $statusBaru = [
     'konfirmasi' => 'Dikonfirmasi',
     'tolak' => 'Ditolak',
     'selesai' => 'Selesai',
+    'tidak_hadir' => 'Tidak Hadir',
 ];
 // Status yang harus dimiliki booking sebelum aksi boleh dijalankan
 $statusSebelum = [
     'konfirmasi' => 'Menunggu Konfirmasi',
     'tolak' => 'Menunggu Konfirmasi',
     'selesai' => 'Dikonfirmasi',
+    'tidak_hadir' => 'Dikonfirmasi',
 ];
 
 if ($kode === '' || !isset($statusBaru[$aksi])) {
     kembali_status('tidak_valid');
+}
+
+// Aturan waktu: yang sudah lewat tidak bisa dikonfirmasi; "Tidak Hadir" hanya untuk jam yang sudah lewat
+try {
+    $w = $pdo->prepare('SELECT tanggal, jam FROM pesanan WHERE kode_booking = :kode LIMIT 1');
+    $w->execute(['kode' => $kode]);
+    $waktu = $w->fetch();
+} catch (Throwable $e) {
+    error_log($e->getMessage());
+    kembali_status('gagal');
+}
+if ($waktu) {
+    if ($aksi === 'konfirmasi' && $waktu['tanggal'] < date('Y-m-d')) {
+        kembali_status('sudah_lewat');
+    }
+    if ($aksi === 'tidak_hadir' && !booking_sudah_lewat($waktu['tanggal'], $waktu['jam'])) {
+        kembali_status('belum_lewat');
+    }
 }
 
 /* Saat booking dikonfirmasi, catat ke tabel `jadwal`:
@@ -106,6 +136,11 @@ try {
     if ($stmt->rowCount() > 0) {
         if ($aksi === 'konfirmasi') {
             catat_jadwal($pdo, $kode);
+        } elseif ($aksi === 'tidak_hadir') {
+            $pdo->prepare(
+                "UPDATE jadwal SET status = 'Tidak Hadir'
+                 WHERE id_pesanan = (SELECT id_pesanan FROM pesanan WHERE kode_booking = :kode)"
+            )->execute(['kode' => $kode]);
         } elseif ($aksi === 'selesai') {
             $pdo->prepare(
                 "UPDATE jadwal SET status = 'Selesai'

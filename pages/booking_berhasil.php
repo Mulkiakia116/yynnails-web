@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/../includes/session.php';
+require __DIR__ . '/../includes/lib.php';   // nomor WhatsApp studio ($C['site']['wa']) & format tanggal
 mulai_session();
 
 if (!isset($_SESSION['booking_berhasil'])) {
@@ -19,6 +20,8 @@ function h($value) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Berhasil | Yynnails</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png?v=2">
+    <link rel="shortcut icon" href="../favicon.ico?v=2">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -126,18 +129,18 @@ function h($value) {
 
         <div class="details">
             <div><strong>Layanan:</strong> <?= h($booking['layanan']) ?></div>
-            <div><strong>Tanggal:</strong> <?= h($booking['tanggal']) ?></div>
-            <div><strong>Waktu:</strong> <?= h($booking['jam']) ?></div>
+            <div><strong>Tanggal:</strong> <?= h(tgl_indo_hari($booking['tanggal'])) ?></div>
+            <div><strong>Waktu:</strong> <?= h(jam_pendek($booking['jam'])) ?> WITA</div>
             <div><strong>Status:</strong> Menunggu Konfirmasi</div>
         </div>
 
         <p>Jadwal belum final sampai pihak Yynnails mengonfirmasinya.</p>
         
 <a class="btn"
-   href="https://wa.me/6285825280212?text=Halo%20Yynnails%2C%20saya%20mengirim%20booking%20baru."
+   href="https://wa.me/<?= h($C['site']['wa']) ?>?text=<?= rawurlencode('Halo Yynnails, saya sudah booking. Kode booking: ' . $booking['kode'] . ' (' . $booking['layanan'] . ', ' . tgl_indo($booking['tanggal']) . ' jam ' . jam_pendek($booking['jam']) . ').') ?>"
    target="_blank"
    rel="noopener">
-   Kirim Booking via WhatsApp
+   Konfirmasi via WhatsApp
 </a>
 
 

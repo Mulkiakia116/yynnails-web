@@ -12,10 +12,17 @@ $pesanStatus = [
     'tidak_valid'  => ['err', 'Permintaan tidak valid.'],
     'csrf'         => ['err', 'Sesi formulir tidak valid. Muat ulang halaman lalu coba lagi.'],
     'gagal'        => ['err', 'Gagal memperbarui status. Silakan coba lagi.'],
+    'sudah_lewat'  => ['err', 'Booking ini sudah lewat tanggalnya, jadi tidak bisa dikonfirmasi lagi.'],
+    'belum_lewat'  => ['err', 'Booking ini belum lewat waktunya, jadi belum bisa ditandai Tidak Hadir.'],
     'reset_ok'       => ['ok',  'Riwayat booking berhasil direset. Semua data booking dan pelanggan sudah dihapus.'],
     'reset_kata'     => ['err', 'Reset dibatalkan: ketik kata RESET persis seperti contoh.'],
     'reset_password' => ['err', 'Reset dibatalkan: password admin salah.'],
     'reset_gagal'    => ['err', 'Reset gagal. Tidak ada data yang dihapus. Silakan coba lagi.'],
+    'bersih_ok'       => ['ok',  'Riwayat lama berhasil dibersihkan: ' . (int) ($_GET['n'] ?? 0) . ' booking beserta foto referensinya dihapus.'],
+    'bersih_kosong'   => ['ok',  'Tidak ada riwayat yang cukup lama untuk dibersihkan.'],
+    'bersih_kata'     => ['err', 'Pembersihan dibatalkan: ketik kata BERSIHKAN persis seperti contoh.'],
+    'bersih_password' => ['err', 'Pembersihan dibatalkan: password admin salah.'],
+    'bersih_gagal'    => ['err', 'Pembersihan gagal. Tidak ada data yang dihapus. Silakan coba lagi.'],
 ];
 $infoPesan = $pesanStatus[$_GET['pesan'] ?? ''] ?? null;
 
@@ -43,7 +50,15 @@ $petaFilter = [
     'menunggu'     => 'Menunggu Konfirmasi',
     'dikonfirmasi' => 'Dikonfirmasi',
     'selesai'      => 'Selesai',
+    'ditolak'      => 'Ditolak',
+    'kedaluwarsa'  => 'Kedaluwarsa',
+    'tidak_hadir'  => 'Tidak Hadir',
+    'tindak_lanjut' => 'Perlu Ditindaklanjuti',
 ];
+$sekarang = date('Y-m-d H:i:s');
+
+// Pesanan Menunggu yang tanggalnya sudah lewat otomatis jadi Kedaluwarsa
+kedaluwarsakan_booking($pdo);
 $filter = (string) ($_GET['status'] ?? '');
 if (!isset($petaFilter[$filter])) {
     $filter = '';
@@ -71,24 +86,53 @@ try {
          WHERE status = 'Selesai'"
     )->fetchColumn();
 
+    $ditolak = (int) $pdo->query(
+        "SELECT COUNT(*) FROM pesanan
+         WHERE status = 'Ditolak'"
+    )->fetchColumn();
+
+    // Jumlah riwayat lama yang bisa dibersihkan (ditampilkan di bagian "Bersihkan Riwayat Lama")
+    $batasRiwayat = date('Y-m-d', strtotime('-' . RIWAYAT_BULAN . ' months'));
+    $cekRiwayat = $pdo->prepare(
+        'SELECT COUNT(*) FROM pesanan WHERE status IN (' . implode(', ', array_fill(0, count(RIWAYAT_STATUS), '?')) . ') AND tanggal < ?'
+    );
+    $cekRiwayat->execute([...RIWAYAT_STATUS, $batasRiwayat]);
+    $riwayatLama = (int) $cekRiwayat->fetchColumn();
+
+    $kedaluwarsa = (int) $pdo->query("SELECT COUNT(*) FROM pesanan WHERE status = 'Kedaluwarsa'")->fetchColumn();
+    $tidakHadir = (int) $pdo->query("SELECT COUNT(*) FROM pesanan WHERE status = 'Tidak Hadir'")->fetchColumn();
+
+    // Sudah Dikonfirmasi tapi jamnya sudah lewat: admin perlu menandai Selesai atau Tidak Hadir
+    $cekTindak = $pdo->prepare(
+        "SELECT COUNT(*) FROM pesanan
+         WHERE status = 'Dikonfirmasi' AND CONCAT(tanggal, ' ', jam) <= :now"
+    );
+    $cekTindak->execute(['now' => $sekarang]);
+    $tindakLanjut = (int) $cekTindak->fetchColumn();
+
     $jumlahTampil = $filter === '' ? $total : (int) match ($filter) {
-        'menunggu' => $menunggu, 'dikonfirmasi' => $dikonfirmasi, default => $selesai,
+        'menunggu' => $menunggu, 'dikonfirmasi' => $dikonfirmasi, 'selesai' => $selesai,
+        'kedaluwarsa' => $kedaluwarsa, 'tidak_hadir' => $tidakHadir, 'tindak_lanjut' => $tindakLanjut,
+        default => $ditolak,
     };
     $totalHalaman = max(1, (int) ceil($jumlahTampil / $perHalaman));
     $hal = min($hal, $totalHalaman);
 
     $stmt = $pdo->prepare(
         'SELECT p.kode_booking, p.layanan, p.tanggal,
-                p.jam, p.status, p.referensi_design,
+                p.jam, p.status, p.referensi_design, p.catatan,
                 pl.nama, pl.no_whatsapp
          FROM pesanan p
          INNER JOIN pelanggan pl
             ON p.id_pelanggan = pl.id_pelanggan
-         ' . ($filter !== '' ? 'WHERE p.status = :status' : '') . '
-         ORDER BY p.id_pesanan DESC
+         ' . ($filter === 'tindak_lanjut'
+                ? "WHERE p.status = 'Dikonfirmasi' AND CONCAT(p.tanggal, ' ', p.jam) <= :now"
+                : ($filter !== '' ? 'WHERE p.status = :status' : '')) . '
+         ORDER BY ' . ($filter === 'tindak_lanjut' ? 'p.tanggal, p.jam' : 'p.id_pesanan DESC') . '
          LIMIT ' . $perHalaman . ' OFFSET ' . (($hal - 1) * $perHalaman)
     );
-    $stmt->execute($filter !== '' ? ['status' => $petaFilter[$filter]] : []);
+    $stmt->execute($filter === 'tindak_lanjut' ? ['now' => $sekarang]
+                 : ($filter !== '' ? ['status' => $petaFilter[$filter]] : []));
     $pesanan = $stmt->fetchAll();
 } catch (Throwable $e) {
     error_log($e->getMessage());
@@ -167,7 +211,26 @@ admin_top($p);
                 <p>Selesai</p>
                 <div class="number"><?= $selesai ?></div>
             </a>
+            <a class="card stat<?= $filter === 'ditolak' ? ' active' : '' ?>" href="<?= h(link_dash('ditolak')) ?>" title="Tampilkan yang ditolak">
+                <p>Ditolak</p>
+                <div class="number"><?= $ditolak ?></div>
+            </a>
+            <a class="card stat<?= $filter === 'kedaluwarsa' ? ' active' : '' ?>" href="<?= h(link_dash('kedaluwarsa')) ?>" title="Menunggu konfirmasi tapi tanggalnya sudah lewat">
+                <p>Kedaluwarsa</p>
+                <div class="number"><?= $kedaluwarsa ?></div>
+            </a>
+            <a class="card stat<?= $filter === 'tidak_hadir' ? ' active' : '' ?>" href="<?= h(link_dash('tidak_hadir')) ?>" title="Dikonfirmasi tapi pelanggan tidak datang">
+                <p>Tidak Hadir</p>
+                <div class="number"><?= $tidakHadir ?></div>
+            </a>
         </section>
+
+        <?php if ($tindakLanjut > 0 && $filter !== 'tindak_lanjut'): ?>
+            <div class="alert err" role="status">
+                Ada <b><?= $tindakLanjut ?> booking</b> yang jamnya sudah lewat tapi belum ditandai Selesai atau Tidak Hadir.
+                <a class="wa-link" href="<?= h(link_dash('tindak_lanjut')) ?>">Tindak lanjuti sekarang →</a>
+            </div>
+        <?php endif; ?>
 
         <?php if ($infoPesan): ?>
             <div class="alert <?= h($infoPesan[0]) ?>" role="status">
@@ -216,9 +279,17 @@ admin_top($p);
             <span class="muted" title="File <?= h($item['referensi_design']) ?> tidak ada di folder uploads/referensi">Foto referensi tidak ditemukan</span>
         <?php endif; ?>
     <?php endif; ?>
+    <?php if (trim((string) $item['catatan']) !== ''): ?>
+        <br><span class="catatan" title="Catatan dari pelanggan">📝 <?= nl2br(h($item['catatan'])) ?></span>
+    <?php endif; ?>
 </td>
-                                <td><?= h($item['tanggal']) ?></td>
-                                <td><?= h($item['jam']) ?></td>
+                                <td>
+                                    <?= h(tgl_indo($item['tanggal'])) ?>
+                                    <?php if ($item['tanggal'] < date('Y-m-d')): ?>
+                                        <br><span class="muted">(sudah lewat)</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= h(jam_pendek($item['jam'])) ?></td>
                                 <td>
     <?php
     // ubah 0812... menjadi 62812... agar bisa dibuka di WhatsApp
@@ -236,6 +307,9 @@ admin_top($p);
     <span class="status">
         <?= h($item['status']) ?>
     </span>
+    <?php if ($item['status'] === 'Dikonfirmasi' && booking_sudah_lewat($item['tanggal'], $item['jam'])): ?>
+        <br><span class="muted">Perlu ditindaklanjuti</span>
+    <?php endif; ?>
 </td>
 <td>
     <?php if ($item['status'] === 'Menunggu Konfirmasi'): ?>
@@ -277,6 +351,18 @@ admin_top($p);
                 Tandai Selesai
             </button>
         </form>
+        <?php if (booking_sudah_lewat($item['tanggal'], $item['jam'])): ?>
+        <form method="post" action="proses_status.php" class="inline-form">
+            <input type="hidden" name="kode_booking" value="<?= h($item['kode_booking']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+            <input type="hidden" name="filter" value="<?= h($filter) ?>">
+            <input type="hidden" name="hal" value="<?= (int) $hal ?>">
+            <input type="hidden" name="aksi" value="tidak_hadir">
+            <button type="submit" class="btn-gelap" onclick="return confirm('Tandai pelanggan ini tidak hadir?')">
+                Tidak Hadir
+            </button>
+        </form>
+        <?php endif; ?>
     <?php else: ?>
         <span class="muted">Sudah diproses</span>
     <?php endif; ?>
@@ -376,6 +462,33 @@ admin_top($p);
                         </tbody>
                     </table>
                 </div>
+            <?php endif; ?>
+        </section>
+
+        <section class="panel danger-zone" id="riwayat" style="margin-top:28px">
+            <div class="panel-head">
+                <h2>Bersihkan Riwayat Lama</h2>
+                <p class="muted" style="margin:6px 0 0">
+                    Menghapus booking yang sudah <b>ditutup</b> (Selesai, Ditolak, Kedaluwarsa, Tidak Hadir) dan
+                    lebih tua dari <b><?= RIWAYAT_BULAN ?> bulan</b>, beserta foto referensinya. Pelanggan yang tidak punya
+                    booking lagi ikut dihapus. Booking yang masih berjalan <b>tidak</b> disentuh.
+                    Saat ini ada <b><?= $riwayatLama ?> booking</b> yang bisa dibersihkan (sebelum <?= h(tgl_indo($batasRiwayat)) ?>).
+                </p>
+            </div>
+            <?php if ($riwayatLama > 0): ?>
+            <form method="post" action="bersihkan_riwayat.php" class="reset-form"
+                  onsubmit="return confirm('Hapus <?= $riwayatLama ?> booking lama? Data tidak bisa dikembalikan.')">
+                <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+                <label>Ketik <b>BERSIHKAN</b> untuk melanjutkan
+                    <input type="text" name="konfirmasi" autocomplete="off" placeholder="BERSIHKAN" required>
+                </label>
+                <label>Password admin
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button type="submit" class="danger">Bersihkan <?= $riwayatLama ?> Booking Lama</button>
+            </form>
+            <?php else: ?>
+                <div class="empty">Belum ada riwayat yang cukup lama untuk dibersihkan.</div>
             <?php endif; ?>
         </section>
 

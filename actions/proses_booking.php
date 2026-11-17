@@ -3,6 +3,7 @@ require __DIR__ . '/../includes/session.php';
 mulai_session();
 
 require __DIR__ . '/../config/database.php';
+require __DIR__ . '/../includes/booking.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../booking.php');
@@ -15,74 +16,15 @@ if (trim($_POST['website'] ?? '') !== '') {
 }
 
 $nama = trim($_POST['name'] ?? '');
-$wa = trim($_POST['phone'] ?? '');
+$waInput = trim($_POST['phone'] ?? '');
 $layanan = trim($_POST['service'] ?? '');
 $tanggal = trim($_POST['date'] ?? '');
 $jam = trim($_POST['time'] ?? '');
 $catatan = trim($_POST['notes'] ?? '');
-
-if (
-    $nama === '' || $wa === '' || $layanan === '' ||
-    $tanggal === '' || $jam === ''
-) {
-    exit('Data booking belum lengkap. Silakan kembali dan lengkapi form.');
-}
-
-if (!preg_match('/^[0-9+\s()-]{8,20}$/', $wa)) {
-    exit('Nomor WhatsApp tidak valid. Silakan periksa kembali.');
-}
-
-
-$tanggalObj = DateTime::createFromFormat('!Y-m-d', $tanggal);
-$errorsTanggal = DateTime::getLastErrors();
-
-if (
-    !$tanggalObj ||
-    ($errorsTanggal !== false &&
-        ($errorsTanggal['warning_count'] > 0 ||
-         $errorsTanggal['error_count'] > 0)) ||
-    $tanggalObj->format('Y-m-d') !== $tanggal
-) {
-    exit('Tanggal tidak valid. Silakan pilih tanggal yang benar.');
-}
-
-$hariIni = new DateTime('today');
-
-if ($tanggalObj < $hariIni) {
-    exit('Tanggal booking tidak boleh di masa lalu.');
-}
-
-
-// Layanan yang boleh dibooking diambil dari tabel `layanan` (bukan ditulis manual)
-try {
-    $layananDiizinkan = $pdo->query(
-        'SELECT nama_layanan FROM layanan WHERE aktif = 1 AND bisa_booking = 1'
-    )->fetchAll(PDO::FETCH_COLUMN);
-} catch (Throwable $e) {
-    error_log($e->getMessage());
-    http_response_code(500);
-    exit('Daftar layanan belum dapat dimuat. Silakan coba lagi.');
-}
-
-if (!in_array($layanan, $layananDiizinkan, true)) {
-    exit('Pilihan layanan tidak valid.');
-}
-
-$waktuDiizinkan = [
-    '10:00', '11:00', '13:00', '14:00',
-    '15:00', '16:00', '17:00', '19:00'
-];
-
-if (!in_array($jam, $waktuDiizinkan, true)) {
-    exit('Pilihan waktu tidak valid.');
-}
-
-
-$kodeBooking = 'YN' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 $referensi = '';
 
-// Kalau booking akhirnya ditolak, foto referensi yang sudah terlanjur
-// tersimpan dibuang supaya tidak menumpuk di uploads/referensi.
+// Foto referensi yang sudah terlanjur tersimpan dibuang kalau booking akhirnya gagal,
+// supaya tidak menumpuk di uploads/referensi.
 function buang_referensi(string $nama): void {
     if ($nama === '') {
         return;
@@ -93,21 +35,98 @@ function buang_referensi(string $nama): void {
     }
 }
 
+/* SEMUA kegagalan booking lewat fungsi ini (bukan halaman putih berisi teks):
+   pelanggan dikembalikan ke form booking dengan pesan di atas form dan isiannya
+   terisi lagi. Foto referensi memang harus diunggah ulang.
+   $simpanTanggal = false kalau tanggalnya sendiri yang salah, supaya dipilih ulang. */
+function gagal_booking(string $pesan, bool $simpanTanggal = true): void {
+    global $pdo, $referensi, $nama, $waInput, $layanan, $tanggal, $jam, $catatan;
+
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    buang_referensi($referensi);
+
+    $_SESSION['booking_error'] = [
+        'pesan' => $pesan,
+        'form'  => [
+            'nama'    => $nama,
+            'wa'      => $waInput,
+            'layanan' => $layanan,
+            'tanggal' => $simpanTanggal ? $tanggal : '',
+            'jam'     => $jam,
+            'catatan' => $catatan,
+        ],
+    ];
+    header('Location: ../booking.php?isi=1');
+    exit;
+}
+
+if ($nama === '' || $waInput === '' || $layanan === '' || $tanggal === '' || $jam === '') {
+    gagal_booking('Data booking belum lengkap. Lengkapi dulu semua kolom yang bertanda *.');
+}
+
+if (mb_strlen($nama) > 100) {
+    gagal_booking('Nama terlalu panjang (maksimal 100 karakter).');
+}
+
+// Nomor WhatsApp: boleh diketik dengan spasi, tanda hubung, atau +62; disimpan dalam satu bentuk (08xxxx)
+if (!preg_match('/^[0-9+\s()-]{8,20}$/', $waInput)) {
+    gagal_booking('Nomor WhatsApp tidak valid. Periksa kembali nomornya.');
+}
+$wa = normalisasi_wa($waInput);
+if (strlen($wa) < 9 || strlen($wa) > 14 || $wa[0] !== '0') {
+    gagal_booking('Nomor WhatsApp tidak valid. Contoh yang benar: 0812 3456 7890.');
+}
+
+if (!tanggal_valid($tanggal)) {
+    gagal_booking('Tanggal tidak valid. Silakan pilih tanggal yang benar.', false);
+}
+
+if ($tanggal < date('Y-m-d')) {
+    gagal_booking('Tanggal booking tidak boleh di masa lalu. Silakan pilih tanggal lain.', false);
+}
+
+if (!in_array($jam, konfigurasi_booking()['jam'], true)) {
+    gagal_booking('Pilihan waktu tidak valid.');
+}
+
+// Hari ini: jam yang sudah lewat tidak bisa dibooking
+if (in_array($jam, slot_lewat($tanggal), true)) {
+    gagal_booking('Jam ' . $jam . ' hari ini sudah lewat. Pilih jam yang lebih akhir atau tanggal lain.');
+}
+
+// Layanan yang boleh dibooking diambil dari tabel `layanan` (bukan ditulis manual)
+try {
+    $layananDiizinkan = $pdo->query(
+        'SELECT nama_layanan FROM layanan WHERE aktif = 1 AND bisa_booking = 1'
+    )->fetchAll(PDO::FETCH_COLUMN);
+} catch (Throwable $e) {
+    error_log($e->getMessage());
+    gagal_booking('Daftar layanan belum dapat dimuat. Silakan coba lagi.');
+}
+
+if (!in_array($layanan, $layananDiizinkan, true)) {
+    gagal_booking('Layanan yang dipilih tidak tersedia untuk dibooking. Silakan pilih layanan lain.');
+}
+
+$kodeBooking = 'YN' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+
 if (
     isset($_FILES['referensi']) &&
     $_FILES['referensi']['error'] !== UPLOAD_ERR_NO_FILE
 ) {
     $errUpload = $_FILES['referensi']['error'];
     if ($errUpload === UPLOAD_ERR_INI_SIZE || $errUpload === UPLOAD_ERR_FORM_SIZE) {
-        exit('Ukuran foto terlalu besar. Maksimal 5 MB, silakan pilih foto yang lebih kecil.');
+        gagal_booking('Ukuran foto terlalu besar. Maksimal 5 MB, silakan pilih foto yang lebih kecil.');
     }
     if ($errUpload !== UPLOAD_ERR_OK) {
         error_log('Upload referensi gagal, kode error PHP: ' . $errUpload);
-        exit('Foto gagal diunggah. Silakan coba kembali.');
+        gagal_booking('Foto gagal diunggah. Silakan coba kembali.');
     }
 
     if ($_FILES['referensi']['size'] > 5 * 1024 * 1024) {
-        exit('Ukuran foto maksimal 5 MB.');
+        gagal_booking('Ukuran foto maksimal 5 MB.');
     }
 
     $tmpFile = $_FILES['referensi']['tmp_name'];
@@ -122,19 +141,20 @@ if (
     ];
 
     if (!isset($tipeDiizinkan[$mime]) || getimagesize($tmpFile) === false) {
-        exit('Format foto harus JPG, PNG, atau WEBP.');
+        gagal_booking('Format foto harus JPG, PNG, atau WEBP.');
     }
 
     $folderUpload = __DIR__ . '/../uploads/referensi/';
 
     if (!is_dir($folderUpload) || !is_writable($folderUpload)) {
-        exit('Folder upload belum siap. Periksa folder uploads/referensi.');
+        error_log('Folder uploads/referensi tidak bisa ditulis.');
+        gagal_booking('Foto belum bisa disimpan di server. Kirim booking tanpa foto, atau hubungi kami via WhatsApp.');
     }
 
     $namaFile = bin2hex(random_bytes(16)) . '.' . $tipeDiizinkan[$mime];
 
     if (!move_uploaded_file($tmpFile, $folderUpload . $namaFile)) {
-        exit('Foto gagal disimpan. Silakan coba kembali.');
+        gagal_booking('Foto gagal disimpan. Silakan coba kembali.');
     }
 
     $referensi = $namaFile;
@@ -146,113 +166,72 @@ try {
 
     // Anti-spam: satu nomor WhatsApp maksimal 3 booking yang masih menunggu konfirmasi
     $batasMenunggu = 3;
+    [$wa1, $wa2] = varian_wa($wa);
     $cekMenunggu = $pdo->prepare(
         "SELECT COUNT(*)
          FROM pesanan p
          INNER JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan
          WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(pl.no_whatsapp,' ',''),'-',''),'(',''),')',''),'+','')
-             = :wa
+               IN (:wa1, :wa2)
            AND p.status = 'Menunggu Konfirmasi'
            AND p.tanggal >= CURDATE()"
     );
-    $cekMenunggu->execute([
-        'wa' => str_replace([' ', '-', '(', ')', '+'], '', $wa),
-    ]);
+    $cekMenunggu->execute(['wa1' => $wa1, 'wa2' => $wa2]);
 
     if ((int) $cekMenunggu->fetchColumn() >= $batasMenunggu) {
-        $pdo->rollBack();
-        buang_referensi($referensi);
-        exit('Kamu masih punya beberapa booking yang menunggu konfirmasi. Mohon tunggu konfirmasi dari admin atau hubungi kami via WhatsApp.');
+        gagal_booking('Kamu masih punya ' . $batasMenunggu . ' booking yang menunggu konfirmasi. Mohon tunggu konfirmasi dari admin atau hubungi kami via WhatsApp.');
     }
 
-    // Pembatasan kuota harian untuk layanan tertentu
-    // Aturan kuota (layanan & batas per hari) diatur di data/content.php -> 'kuota'
-    $aturanKuota = (function () {
-        $C = require __DIR__ . '/../data/content.php';
-        return $C['kuota'];
-    })();
-    $layananTerbatas = $aturanKuota['layanan'];
-    $batasHarian = (int) $aturanKuota['batas_harian'];
-
-    if (in_array($layanan, $layananTerbatas, true)) {
-        $tandaTanya = implode(', ', array_fill(0, count($layananTerbatas), '?'));
-        $cekKuota = $pdo->prepare(
-            "SELECT COUNT(*) FROM pesanan
-             WHERE tanggal = ?
-               AND layanan IN ($tandaTanya)
-               AND status IN ('Menunggu Konfirmasi', 'Dikonfirmasi', 'Selesai')
-             FOR UPDATE"
-        );
-        $cekKuota->execute([$tanggal, ...$layananTerbatas]);
-
-        if ((int) $cekKuota->fetchColumn() >= $batasHarian) {
-            $pdo->rollBack();
-            buang_referensi($referensi);
-            // Isian disimpan sementara di session supaya form bisa terisi lagi
-            // waktu pelanggan memilih tanggal lain (foto tidak bisa diisi ulang).
-            $_SESSION['kuota_penuh'] = [
+    // Kuota harian layanan tertentu (aturan di data/content.php -> 'kuota')
+    $kuota = kuota_harian($pdo, $tanggal, $layanan);
+    if ($kuota['penuh']) {
+        $pdo->rollBack();
+        buang_referensi($referensi);
+        // Isian disimpan sementara di session supaya form bisa terisi lagi
+        // waktu pelanggan memilih tanggal lain (foto tidak bisa diisi ulang).
+        $_SESSION['kuota_penuh'] = [
+            'layanan' => $layanan,
+            'tanggal' => $tanggal,
+            'form' => [
+                'nama'    => $nama,
+                'wa'      => $waInput,
                 'layanan' => $layanan,
-                'tanggal' => $tanggal,
-                'form' => [
-                    'nama'    => $nama,
-                    'wa'      => $wa,
-                    'layanan' => $layanan,
-                    'jam'     => $jam,
-                    'catatan' => $catatan,
-                ],
-            ];
-            header('Location: ../kuota_penuh.php');
-            exit;
-        }
+                'jam'     => $jam,
+                'catatan' => $catatan,
+            ],
+        ];
+        header('Location: ../kuota_penuh.php');
+        exit;
     }
 
-    $cekJadwal = $pdo->prepare(
-        "SELECT COUNT(*) FROM pesanan
-         WHERE tanggal = :tanggal
-           AND jam = :jam
-           AND status IN ('Menunggu Konfirmasi', 'Dikonfirmasi')"
-    );
+    // Satu jam hanya untuk satu booking. 'Selesai' ikut dihitung supaya jam yang
+    // sudah dipakai tidak bisa dibooking ulang.
+    $stSlot = implode(', ', array_fill(0, count(STATUS_SLOT), '?'));
+    $cekJadwal = $pdo->prepare("SELECT COUNT(*) FROM pesanan WHERE tanggal = ? AND jam = ? AND status IN ($stSlot)");
+    $cekJadwal->execute([$tanggal, $jam, ...STATUS_SLOT]);
 
-    $cekJadwal->execute([
-        'tanggal' => $tanggal,
-        'jam' => $jam
-    ]);
-
-    if ($cekJadwal->fetchColumn() > 0) {
-        $pdo->rollBack();
-        buang_referensi($referensi);
-        exit('Maaf, jadwal tersebut sudah memiliki booking. Silakan pilih waktu lain.');
+    if ((int) $cekJadwal->fetchColumn() > 0) {
+        gagal_booking('Maaf, jam ' . $jam . ' pada ' . tgl_indo($tanggal) . ' sudah dipesan orang lain. Silakan pilih jam lain.');
     }
 
+    // Pelanggan dikenali dari nomor WhatsApp (sudah dinormalisasi). Nama pelanggan lama
+    // tidak ditimpa, supaya riwayat booking sebelumnya tidak ikut berubah nama.
     $cekPelanggan = $pdo->prepare(
-        'SELECT id_pelanggan FROM pelanggan
-         WHERE no_whatsapp = :wa LIMIT 1'
+        "SELECT id_pelanggan FROM pelanggan
+         WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(no_whatsapp,' ',''),'-',''),'(',''),')',''),'+','')
+               IN (:wa1, :wa2)
+         ORDER BY id_pelanggan LIMIT 1"
     );
-    $cekPelanggan->execute(['wa' => $wa]);
-
+    $cekPelanggan->execute(['wa1' => $wa1, 'wa2' => $wa2]);
     $pelanggan = $cekPelanggan->fetch();
 
     if ($pelanggan) {
         $idPelanggan = $pelanggan['id_pelanggan'];
-
-        $updatePelanggan = $pdo->prepare(
-            'UPDATE pelanggan SET nama = :nama, updated_at = CURRENT_TIMESTAMP
-             WHERE id_pelanggan = :id'
-        );
-        $updatePelanggan->execute([
-            'nama' => $nama,
-            'id' => $idPelanggan
-        ]);
+        $pdo->prepare('UPDATE pelanggan SET updated_at = CURRENT_TIMESTAMP WHERE id_pelanggan = :id')
+            ->execute(['id' => $idPelanggan]);
     } else {
-        $tambahPelanggan = $pdo->prepare(
-            'INSERT INTO pelanggan (nama, no_whatsapp)
-             VALUES (:nama, :wa)'
-        );
-        $tambahPelanggan->execute([
-            'nama' => $nama,
-            'wa' => $wa
-        ]);
-
+        $pdo->prepare('INSERT INTO pelanggan (nama, no_whatsapp) VALUES (:nama, :wa)')
+            ->execute(['nama' => $nama, 'wa' => $wa]);
         $idPelanggan = $pdo->lastInsertId();
     }
 
@@ -278,6 +257,7 @@ try {
 
     $pdo->commit();
 
+    unset($_SESSION['booking_error'], $_SESSION['kuota_penuh']);
     $_SESSION['booking_berhasil'] = [
         'kode' => $kodeBooking,
         'nama' => $nama,
@@ -292,19 +272,17 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    buang_referensi($referensi);
 
-    // Dua orang booking jadwal yang sama di detik yang sama: yang kedua ditolak oleh
+    // Dua orang booking jam yang sama di detik yang sama: yang kedua ditolak oleh
     // unique index `uniq_slot_aktif` di tabel pesanan (lihat database/yynnails.sql).
     if (
         $e instanceof PDOException &&
         (int) ($e->errorInfo[1] ?? 0) === 1062 &&
         str_contains($e->getMessage(), 'uniq_slot_aktif')
     ) {
-        exit('Maaf, jadwal tersebut baru saja dipesan orang lain. Silakan pilih waktu lain.');
+        gagal_booking('Maaf, jam itu baru saja dipesan orang lain. Silakan pilih jam lain.');
     }
 
     error_log($e->getMessage());
-    http_response_code(500);
-    exit('Booking belum berhasil disimpan. Silakan coba kembali.');
+    gagal_booking('Booking belum berhasil disimpan. Silakan coba kembali.');
 }

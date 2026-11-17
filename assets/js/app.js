@@ -73,11 +73,53 @@
 
     };
     bk.addEventListener('input', upd); bk.addEventListener('change', upd);
+
+    // Tanggal tidak boleh di masa lalu (server tetap memeriksa lagi)
+    const tglIn = $('[name=date]', bk), jamIn = $('[name=time]', bk), info = $('#slot-info');
+    const pad = x => String(x).padStart(2, '0');
+    const kini = new Date();
+    tglIn.min = `${kini.getFullYear()}-${pad(kini.getMonth() + 1)}-${pad(kini.getDate())}`;
+
+    // Jam yang sudah terisi / sudah lewat dimatikan di pilihan waktu, kuota penuh diberi tahu
+    let kuotaPenuh = false, seq = 0;
+    const cekSlot = async () => {
+      const tgl = tglIn.value, ly = $('[name=service]:checked', bk)?.value || '', mine = ++seq;
+      const opsi = $$('option', jamIn).filter(o => o.value);
+      opsi.forEach(o => { o.disabled = false; o.textContent = o.value; });
+      kuotaPenuh = false; info.hidden = true;
+      if (!tgl) return;
+      try {
+        const res = await fetch(`actions/slot.php?tanggal=${encodeURIComponent(tgl)}&layanan=${encodeURIComponent(ly)}`, { cache: 'no-store' });
+        if (!res.ok || mine !== seq) return;
+        const d = await res.json();
+        opsi.forEach(o => {
+          const lewat = d.lewat.includes(o.value), isi = d.terisi.includes(o.value);
+          if (lewat || isi) { o.disabled = true; o.textContent = `${o.value} (${lewat ? 'sudah lewat' : 'sudah dipesan'})`; }
+        });
+        if (jamIn.selectedOptions[0]?.disabled) jamIn.value = '';
+        const sisa = opsi.filter(o => !o.disabled).length;
+        if (d.kuota_penuh) {
+          kuotaPenuh = true;
+          info.textContent = `Kuota ${ly} pada tanggal ini sudah penuh (maksimal ${d.batas} per hari untuk ${d.layanan_kuota.join(' dan ')}). Silakan pilih tanggal lain.`;
+          info.hidden = false;
+        } else if (!sisa) {
+          info.textContent = 'Semua jam pada tanggal ini sudah terisi atau lewat. Silakan pilih tanggal lain.';
+          info.hidden = false;
+        }
+        upd();
+      } catch (e) { /* kalau gagal, server tetap memeriksa saat dikirim */ }
+    };
+    tglIn.addEventListener('change', cekSlot);
+    bk.addEventListener('change', e => { if (e.target.name === 'service') cekSlot(); });
+    window.addEventListener('load', () => setTimeout(cekSlot, 50));
+    upd();
+
     B.onclick = () => go(n - 1);
     N.onclick = () => {
       const bad = $$('[required]', P[n]).find(x => !x.checkValidity());
       if (bad) return bad.reportValidity();
       if (n < P.length - 1) return go(n + 1);
+      if (kuotaPenuh) { go(0); info.scrollIntoView({ block: 'center' }); return; }
       bk.submit();
     };
       

@@ -106,3 +106,17 @@ Relasi: `pesanan.id_pelanggan â†’ pelanggan.id_pelanggan`, `jadwal.id_pesanan â†
 - **Edit & Hapus Layanan**: tombol **Edit** membuka form lengkap (nama, ikon, foto, harga, dll.). Mengganti nama ikut memperbarui riwayat booking dan kategori galeri. Layanan yang masih punya booking aktif tidak bisa dihapus (nonaktifkan saja).
 - **Reset Riwayat Booking** (bagian paling bawah dashboard): menghapus semua booking, jadwal, foto referensi, dan data pelanggan. Wajib mengetik `RESET` dan password admin. Layanan, galeri, dan akun admin tidak ikut terhapus.
 - Semua kotak dan tombol punya efek hover/klik (admin dan situs publik).
+- **Menu Jadwal** (`admin/jadwal.php`): tampilan per tanggal berisi semua jam (terisi, kosong, istirahat), kuota harian Nail Art + Nail Tip, tombol Konfirmasi/Tolak/Tandai Selesai, dan ringkasan 14 hari ke depan. Daftar jam diatur di `data/content.php` (`jam_booking`, `jam_istirahat`).
+
+- **Pesanan yang sudah lewat:** *Menunggu Konfirmasi* yang tanggalnya lewat otomatis menjadi **Kedaluwarsa** (saat dashboard, jadwal, atau cek status dibuka). *Dikonfirmasi* yang jamnya lewat muncul di kotak "Perlu Ditindaklanjuti"; admin memilih **Tandai Selesai** (pelanggan datang) atau **Tidak Hadir**. Kedaluwarsa dan Tidak Hadir membebaskan jam dan kuota.
+
+- **Bersihkan Riwayat Lama** (bawah dashboard): menghapus booking yang sudah ditutup (Selesai, Ditolak, Kedaluwarsa, Tidak Hadir) dan lebih tua dari 6 bulan, beserta foto referensi dan pelanggan yang tidak punya booking lagi. Perlu mengetik `BERSIHKAN` dan password admin. Batas umurnya diatur lewat `RIWAYAT_BULAN` di `admin/includes/lib.php`.
+
+## Alur Booking Pelanggan
+
+- Tombol panah di kartu layanan (Home, Services, Price List) membuka `booking.php?layanan=Nama` dengan layanan sudah terpilih. Pelanggan tinggal mengisi nama, nomor WhatsApp, tanggal, dan jam.
+- Setelah memilih tanggal, jam yang sudah dipesan atau sudah lewat dimatikan di pilihan waktu (`actions/slot.php`), dan pelanggan diberi tahu kalau kuota harian layanan itu penuh.
+- Kalau booking tetap gagal (jam bentrok, kuota penuh, dll.), pelanggan kembali ke form dengan pesan di atasnya dan isiannya terisi lagi. Foto referensi perlu diunggah ulang.
+- Satu jam hanya untuk satu booking. Status Menunggu, Dikonfirmasi, dan Selesai mengunci jam; Ditolak membebaskannya.
+- Nomor WhatsApp disimpan dalam satu bentuk (`08xxxx`), jadi `+62 812...` dan `0812...` dikenali sebagai pelanggan yang sama. Nama pelanggan lama tidak ditimpa.
+- Semua perhitungan tanggal & jam memakai waktu Palopo (WITA).

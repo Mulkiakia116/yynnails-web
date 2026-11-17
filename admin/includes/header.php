@@ -9,8 +9,9 @@ function admin_top(array $p): void {
        . '<head>' . "\n"
        . '<meta charset="UTF-8">' . "\n"
        . '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n"
-       . '<title>' . h($p['title'] . ' | ' . $A['site']) . '</title>' . "\n"
-       . '<link rel="icon" type="image/png" href="../assets/img/logo.png">' . "\n";
+       . '<title>' . h($p['title'] . ' | ' . $A['site']) . '</title>' . "\n";
+
+    echo '<link rel="icon" type="image/png" href="../assets/img/favicon.png?v=2"><link rel="shortcut icon" href="../favicon.ico?v=2">' . "\n";
 
     if (!empty($p['font'])) {
         echo '<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">' . "\n";

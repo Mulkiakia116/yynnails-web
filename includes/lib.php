@@ -101,6 +101,7 @@ function socials(){
     return '<div class="soc">'.$o.'</div>';
 }
 
+require_once __DIR__ . '/booking.php';  // aturan jam, kuota, nomor WA (juga dipakai admin)
 require_once __DIR__ . '/db.php';       // koneksi database (db())
 require_once __DIR__ . '/layanan.php';  // data layanan & harga dari database
 
@@ -384,22 +385,31 @@ function s_follow($s){
      . '<div class="box chat"><span class="ic big">💬</span><div><b>'.e($c[0]).'</b><p>'.nl($c[1]).'</p></div>'.btn([$c[2], '@wa']).'</div></div></section>';
 }
 function s_booking($s){
-  global $isiForm;
+  global $isiForm, $pesanBooking;
   $P = $s['panes']; $sm = $s['summary']; $b = $s['btn'];
   
 echo '<section class="sec"><div class="wrap bk"><div class="bk-main"><form class="box" id="bk" method="post" action="actions/proses_booking.php" enctype="multipart/form-data">';
-  if (!empty($isiForm)) {
+  $ly = layanan_booking();
+  // Layanan terpilih: dari tombol di kartu layanan (?layanan=Nama) atau dari isian yang dikembalikan
+  $namaLy = array_column($ly, 1);
+  $pilih = trim((string) ($_GET['layanan'] ?? ($isiForm['layanan'] ?? '')));
+  if (!in_array($pilih, $namaLy, true)) $pilih = '';
+
+  if (!empty($pesanBooking)) {
+    echo '<p class="note err" role="alert">⚠️ '.e($pesanBooking).'<br><small>Datamu sudah terisi kembali. Unggah ulang foto referensi kalau ada.</small></p>';
+  } elseif (!empty($isiForm)) {
     echo '<p class="note">✨ Datamu sudah terisi kembali. Tinggal pilih <b>tanggal lain</b>, dan unggah ulang foto referensi kalau ada.</p>';
+  } elseif ($pilih !== '' && isset($_GET['layanan'])) {
+    echo '<p class="note">💅 Layanan <b>'.e($pilih).'</b> sudah terpilih. Tinggal isi data diri, tanggal, dan jam. Mau ganti layanan? Bisa di langkah 2.</p>';
   }
   echo '<ol class="stp">';
 
   foreach ($s['steps'] as $k => $t) echo '<li'.($k ? '' : ' class="on"').'>'.e($t).'</li>';
   echo '</ol>';
-  echo '<div class="pane on"><h3>'.e($P[0][0]).'</h3><p class="mut">'.e($P[0][1]).'</p><div class="two2">'.fields($s['fields']).'</div></div>';
+  echo '<div class="pane on"><h3>'.e($P[0][0]).'</h3><p class="mut">'.e($P[0][1]).'</p><div class="two2">'.fields($s['fields']).'</div><p class="note" id="slot-info" hidden></p></div>';
   echo '<div class="pane"><h3>'.e($P[1][0]).'</h3><p class="mut">'.e($P[1][1]).'</p><div class="opts">';
-  $ly = layanan_booking();
   if (!$ly) echo '<p class="note">Daftar layanan belum tersedia. Silakan hubungi kami via WhatsApp.</p>';
-  foreach ($ly as $k => $v) echo '<label><input type="radio" name="service" value="'.e($v[1]).'" data-p="'.e($v[2]).'" data-l="Layanan"'.($k ? '' : ' required').'><span class="ic">'.e($v[0]).'</span><span><b>'.e($v[1]).'</b><small>'.e($v[2]).'</small></span></label>';
+  foreach ($ly as $k => $v) echo '<label><input type="radio" name="service" value="'.e($v[1]).'" data-p="'.e($v[2]).'" data-l="Layanan"'.($k ? '' : ' required').($v[1] === $pilih ? ' checked' : '').'><span class="ic">'.e($v[0]).'</span><span><b>'.e($v[1]).'</b><small>'.e($v[2]).'</small></span></label>';
   echo '</div></div>';
   
 echo '<div class="pane"><h3>'.e($P[2][0]).'</h3><p class="mut">'.e($P[2][1]).'</p><label class="drop"><input type="file" name="referensi" accept="image/jpeg,image/png,image/webp" data-l="Referensi Desain" hidden><b>⬆ '.e($s['upload'][0]).'</b><br><small>'.e($s['upload'][1]).'</small></label>'
@@ -439,22 +449,15 @@ if (!empty($isiForm)) {
   echo '<script>window.addEventListener("load",function(){'
      . 'var d='.$json.',f=document.getElementById("bk");if(!f)return;'
      . 'function s(n,v){var e=f.querySelector("[name=\""+n+"\"]");if(e&&v)e.value=v;}'
-     . 's("name",d.nama);s("phone",d.wa);s("time",d.jam);s("notes",d.catatan);'
+     . 's("name",d.nama);s("phone",d.wa);s("time",d.jam);s("notes",d.catatan);s("date",d.tanggal);'
      . 'f.querySelectorAll("input[name=service]").forEach(function(x){if(x.value===d.layanan)x.checked=true;});'
+     . 'var t=f.querySelector("[name=date]");if(t&&!d.tanggal){t.value="";t.focus();}'
      . 'f.dispatchEvent(new Event("input",{bubbles:true}));f.dispatchEvent(new Event("change",{bubbles:true}));'
-     . 'var t=f.querySelector("[name=date]");if(t){t.value="";t.focus();}'
      . '});</script>';
 }
 }
 
 
-// 2026-12-12 -> "12 Desember 2026"
-function tgl_indo($tanggal){
-  $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-  $d = DateTime::createFromFormat('!Y-m-d', (string) $tanggal);
-  return $d ? $d->format('j').' '.$bulan[(int) $d->format('n')].' '.$d->format('Y') : (string) $tanggal;
-}
 
 /* Halaman Kuota Penuh. Teks dari data/content.php (halaman 'kuota_penuh').
    Data layanan & tanggal dikirim dari actions/proses_booking.php lewat
@@ -492,6 +495,7 @@ function s_status($s){
 
         try {
             $pdo = db();
+            kedaluwarsakan_booking($pdo);   // supaya status yang tampil selalu terbaru
 
             $stmt = $pdo->prepare(
                 'SELECT
@@ -528,7 +532,7 @@ function s_status($s){
         . '</button></div>'
         . '<div class="tp" id="t1"><form method="get" class="frm">'
         . '<label class="fld"><span>' . e($s['label']) . ' *</span>'
-        . '<input name="q" value="' . e($q) . '" placeholder="Masukkan kode booking" required>'
+        . '<input name="q" value="' . e($q) . '" placeholder="' . e($s['placeholder'] ?? 'Masukkan kode booking') . '" required>'
         . '</label><button class="btn primary wide">🔍 '
         . e($s['button']) . ' <i>→</i></button></form>';
 
@@ -536,16 +540,26 @@ function s_status($s){
         if (!empty($errorDatabase)) {
             echo '<div class="note">Maaf, status booking belum dapat diperiksa. Silakan coba lagi.</div>';
         } elseif ($r) {
+            $arti = [
+                'Menunggu Konfirmasi' => 'Booking kamu sudah kami terima dan sedang menunggu konfirmasi admin. Kami akan menghubungi lewat WhatsApp.',
+                'Dikonfirmasi'        => 'Jadwal kamu sudah dikonfirmasi. Sampai jumpa di studio, ya ♡',
+                'Ditolak'             => 'Maaf, booking ini tidak dapat diproses (misalnya jadwal tidak tersedia). Silakan booking ulang di tanggal atau jam lain, atau tanya kami lewat WhatsApp.',
+                'Selesai'             => 'Layanan sudah selesai. Terima kasih sudah berkunjung ke Yynnails ♡',
+                'Kedaluwarsa'         => 'Booking ini tidak sempat dikonfirmasi sebelum tanggalnya lewat. Silakan booking ulang di tanggal lain, atau tanya kami lewat WhatsApp.',
+                'Tidak Hadir'         => 'Kamu tercatat tidak hadir pada jadwal ini. Kalau ada kendala, hubungi kami lewat WhatsApp, dan kamu bisa booking ulang kapan saja.',
+            ];
             echo '<div class="note">'
                 . '<b>' . e($r['code']) . '</b> — ' . e($r['status'])
                 . '<br>Nama: ' . e($r['name'])
                 . '<br>Layanan: ' . e($r['service'])
-                . '<br>Tanggal: ' . e($r['date'])
-                . '<br>Waktu: ' . e($r['time'])
-                . '<br><small>' . e($r['note'] ?? '') . '</small>'
+                . '<br>Tanggal: ' . e(tgl_indo_hari($r['date']))
+                . '<br>Waktu: ' . e(jam_pendek($r['time'])) . ' WITA'
+                . (!empty($r['note']) ? '<br><small>Catatan: ' . e($r['note']) . '</small>' : '')
+                . '<br><br>' . e($arti[$r['status']] ?? '')
+                . (in_array($r['status'], ['Ditolak', 'Kedaluwarsa', 'Tidak Hadir'], true) ? '<br><br><a class="btn primary" href="booking.php">Booking Ulang <i>→</i></a>' : '')
                 . '</div>';
         } else {
-            echo '<div class="note">Kode booking tidak ditemukan. Periksa kembali kode yang kamu masukkan.</div>';
+            echo '<div class="note">Kode booking tidak ditemukan. Periksa kembali kode yang kamu masukkan (contoh: YN20261015-4AAD20).</div>';
         }
     }
 

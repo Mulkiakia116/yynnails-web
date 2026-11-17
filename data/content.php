@@ -12,6 +12,10 @@
    ========================================================================== */
 $I = 'assets/img/';
 
+/* Jam booking yang dibuka di form. Dipakai form booking, proses booking, dan menu Jadwal admin.
+   Jam istirahat (12:00 dan 18:00) tidak ada di daftar ini. */
+$JAM = ['10:00','11:00','13:00','14:00','15:00','16:00','17:00','19:00'];
+
 $cats = [['Semua'], ['Nail Art','nailart','✦'], ['Press-on Nails','presson','🎀'], ['Nail Tip','tip','🦋'],
          ['Lash Lift','lash','👁'], ['Manicure','mani','🪷'],['Remover Nail Art','remover','♡']];
 
@@ -63,6 +67,9 @@ return [
    (dihitung gabungan). Layanan lain tidak dibatasi kuota ini.
    Nama layanan harus sama persis dengan yang ada di form booking.
    Ubah angka / daftar di sini saja, proses booking otomatis ikut. */
+'jam_booking'   => $JAM,
+'jam_istirahat' => ['12:00', '18:00'],
+
 'kuota' => [
     'batas_harian' => 5,
     'layanan'      => ['Nail Art', 'Nail Tip'],
@@ -228,11 +235,11 @@ return [
    'panes'=>[['Data Diri','Lengkapi informasi kamu untuk melanjutkan pemesanan.'],['Pilih Layanan','Pilih layanan yang kamu butuhkan.'],
              ['Desain / Referensi (Opsional)','Upload foto desain yang kamu inginkan atau contoh referensi lainnya.'],['Konfirmasi','Periksa kembali data pemesananmu sebelum dikirim.']],
    'fields'=>[['Nama Lengkap','name','text','Masukkan nama lengkap kamu',1],['Nomor WhatsApp','phone','tel','Contoh: 0812 3456 7890',1],
-              ['Tanggal Booking','date','date','',1],['Waktu Pilih','time','select','Pilih waktu',1,['10:00','11:00','13:00','14:00','15:00','16:00','17:00','19:00']]],
+              ['Tanggal Booking','date','date','',1],['Waktu Pilih','time','select','Pilih waktu',1,$JAM]],
    'upload'=>['Klik untuk mengunggah gambar','Format: JPG, PNG | Maks. 5MB'],
    'notes'=>['Catatan Tambahan (Opsional)','Contoh: desain khusus, warna, ukuran, atau permintaan lainnya...'],
    'consent'=>'Saya telah membaca dan menyetujui syarat & ketentuan pemesanan dari Yynnails.',
-   'btn'=>['Lanjut ke Langkah','Kirim Booking via WhatsApp','‹ Kembali'],
+   'btn'=>['Lanjut ke Langkah','Kirim Booking','‹ Kembali'],
    'summary'=>['title'=>'Ringkasan Pemesanan','image'=>'','rows'=>[['📅','Tanggal','date'],['🕒','Waktu','time'],['💅','Layanan','service'],['🏷','Estimasi Harga','price']],
                'info'=>'Setelah mengisi form, tim Yynnails akan menghubungi kamu melalui WhatsApp untuk konfirmasi jadwal.','script'=>'"See you soon" ♡'],
    'help'=>['Butuh Bantuan?','Hubungi kami via WhatsApp','Chat di WhatsApp'],
@@ -242,7 +249,7 @@ return [
 /* --------------------------- CEK STATUS BOOKING --------------------------- */
 'status' => ['title'=>'Cek Status Booking', 'sections'=>[
   ['type'=>'status','eyebrow'=>'CHECK BOOKING STATUS','title'=>'Cek Status Booking Kamu','text'=>'Masukkan kode booking untuk melihat informasi pesanan kamu dengan mudah.',
-   'tabs'=>['Cek Status Booking','Informasi'],'label'=>'Kode Booking','placeholder'=>'Contoh: YN20250925-001','button'=>'Cek Sekarang',
+   'tabs'=>['Cek Status Booking','Informasi'],'label'=>'Kode Booking','placeholder'=>'Contoh: YN20261015-4AAD20','button'=>'Cek Sekarang',
    'info'=>'Kamu bisa menggunakan kode booking yang sudah diberikan.',
    'notfound'=>'Booking tidak ditemukan. Periksa kembali kode booking kamu.',
   ],

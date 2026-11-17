@@ -64,7 +64,7 @@ a{color:var(--head);text-decoration:none}
 .pg-dashboard .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
 .pg-dashboard h1{font-size:28px;color:var(--ink)}
 .pg-dashboard .logout{display:inline-block;padding:11px 15px;border:1px solid var(--line);border-radius:9px;color:var(--head)}
-.pg-dashboard .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}
+.pg-dashboard .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:28px}
 .pg-dashboard .card{padding:22px;border:1px solid var(--line);border-radius:15px;background:var(--card)}
 .pg-dashboard .card p{margin:0 0 14px;color:var(--mut);font-size:13px}
 .pg-dashboard .number{font-size:30px;font-weight:bold;color:var(--head)}
@@ -219,3 +219,16 @@ html{scroll-behavior:smooth}
   *{transition:none!important;scroll-behavior:auto!important}
   .button:hover,.pg-dashboard button:hover,.pg-dashboard a.card.stat:hover,.pg-galeri .card:hover{transform:none}
 }
+
+/* ---------- JADWAL ---------- */
+.pg-dashboard .day-nav{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:22px}
+.pg-dashboard .day-pick{display:flex;gap:8px;align-items:center}
+.pg-dashboard .day-pick input{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit}
+.pg-dashboard .card.penuh{border-color:var(--danger);background:var(--err-bg)}
+.pg-dashboard .card.penuh .number{color:var(--err-ink)}
+.pg-dashboard .row-kosong td,.pg-dashboard .row-istirahat td{background:#fffafc}
+.pg-dashboard .row-istirahat td{font-style:italic}
+.pg-dashboard .row-aktif td{background:var(--soft)}
+.pg-dashboard .catatan{display:inline-block;max-width:260px;margin-top:4px;padding:6px 9px;border-radius:8px;background:var(--soft);color:var(--ink);font-size:12px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.pg-dashboard button.btn-gelap{background:var(--chip);color:var(--chip-ink)}
+.alert.err a{font-weight:bold;text-decoration:underline}

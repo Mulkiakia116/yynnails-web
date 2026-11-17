@@ -14,6 +14,7 @@ return [
 
 'nav' => [
     ['Dashboard',        'dashboard.php',          'dashboard'],
+    ['Jadwal',           'jadwal.php',             'jadwal'],
     ['Layanan & Harga',  'dashboard.php#layanan',  ''],
     ['Galeri Karya',  'galeri.php',    'galeri'],
     ['Lihat Website', '../index.php',  ''],
@@ -32,6 +33,10 @@ return [
     ],
     'dashboard' => [
         'title' => 'Dashboard Admin', 'body' => 'pg-dashboard',
+        'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
+    ],
+    'jadwal' => [
+        'title' => 'Jadwal', 'body' => 'pg-dashboard',
         'css' => $css, 'font' => true, 'js' => false, 'auth' => true,
     ],
     'galeri' => [
@@ -68,6 +73,7 @@ return [
     'ubah_layanan'  => ['auth' => true],
     'hapus_layanan' => ['auth' => true],
     'reset_booking' => ['auth' => true],
+    'bersihkan_riwayat' => ['auth' => true],
     'hapus_galeri'  => ['auth' => true],
     'proses_status' => ['auth' => true],
     'logout'        => ['auth' => false],

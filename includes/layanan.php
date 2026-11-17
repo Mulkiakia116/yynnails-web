@@ -61,6 +61,14 @@ function layanan_filter(): array {
   return $f;
 }
 
+/* Alamat booking dengan layanan sudah terpilih (tinggal isi data diri, tanggal, jam).
+   Layanan yang tidak bisa dibooking (mis. Remover) hanya membuka halaman booking biasa. */
+function url_booking(array $r): string {
+  return (int) $r['bisa_booking'] === 1
+    ? 'booking.php?layanan=' . rawurlencode($r['nama_layanan'])
+    : 'booking.php';
+}
+
 /* Item kartu untuk s_cards(), sesuai 'source' di data/content.php */
 function layanan_items(string $sumber): array {
   $o = [];
@@ -71,7 +79,7 @@ function layanan_items(string $sumber): array {
       if ((int) $r['tampil_layanan'] !== 1) continue;
       $o[] = ['img' => $r['gambar'], 'icon' => $r['ikon'], 'title' => $r['nama_layanan'],
               'text' => $r['deskripsi'], 'label' => 'Mulai dari', 'price' => $teks,
-              'cat' => $r['kategori'], 'url' => 'booking.php'];
+              'cat' => $r['kategori'], 'url' => url_booking($r)];
     } elseif ($sumber === 'beranda_harga') {
       if ((int) $r['unggulan'] !== 1) continue;
       $o[] = ['icon' => $r['ikon'], 'title' => $r['nama_layanan'], 'label' => 'Mulai dari',
@@ -80,7 +88,7 @@ function layanan_items(string $sumber): array {
       if ((int) $r['tampil_harga'] !== 1) continue;
       if ($r['kelompok'] !== ($sumber === 'harga_utama' ? 'utama' : 'lainnya')) continue;
       $o[] = ['img' => ($r['gambar_harga'] ?: $r['gambar']), 'title' => $r['nama_layanan'],
-              'text' => $r['deskripsi'], 'label' => 'Mulai dari', 'price' => $teks, 'url' => 'booking.php'];
+              'text' => $r['deskripsi'], 'label' => 'Mulai dari', 'price' => $teks, 'url' => url_booking($r)];
     }
   }
   if ($sumber === 'beranda_layanan') $o = array_slice($o, 0, 5);

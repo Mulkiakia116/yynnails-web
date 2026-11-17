@@ -92,19 +92,19 @@ CREATE TABLE IF NOT EXISTS `layanan` (
   `bisa_booking` tinyint(1) NOT NULL DEFAULT '1',
   `unggulan` tinyint(1) NOT NULL DEFAULT '0',
   `aktif` tinyint(1) NOT NULL DEFAULT '1',
-  `durasi_menit` int NOT NULL DEFAULT '60',
+  `durasi_menit` int NOT NULL DEFAULT '30',
   PRIMARY KEY (`id_layanan`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table yynnails.layanan: ~7 rows (approximately)
 INSERT IGNORE INTO `layanan` (`id_layanan`, `nama_layanan`, `deskripsi`, `harga`, `satuan`, `gambar`, `gambar_harga`, `ikon`, `kategori`, `kelompok`, `urutan`, `tampil_layanan`, `tampil_harga`, `bisa_booking`, `unggulan`, `aktif`, `durasi_menit`) VALUES
-	(1, 'Nail Art', 'Layanan nail art dengan berbagai desain kreatif dan custom sesuai keinginanmu.', 50000.00, '', 'assets/img/nail.jpeg', 'assets/img/art.jpg', '💅🏻', 'nailart', 'utama', 1, 1, 1, 1, 1, 1, 90),
-	(2, 'Press-on Nails', 'Kuku instan dengan desain trendy dan mudah digunakan.', 25000.00, '', 'assets/img/press.jpeg', 'assets/img/on.jpg', '🎀', 'presson', 'utama', 2, 1, 1, 1, 1, 1, 60),
-	(3, 'Nail Tip', 'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.', 100000.00, '', 'assets/img/tip.jpeg', 'assets/img/tip price.jpg', '🍃', 'tip', 'utama', 3, 1, 1, 1, 1, 1, 120),
-	(4, 'Lash Lift', 'Perawatan bulu mata agar terlihat lebih lentik dan natural.', 45000.00, '', 'assets/img/lash.jpeg', 'assets/img/lift.png', '👁', 'lash', 'lainnya', 4, 1, 1, 1, 1, 1, 60),
-	(5, 'Manicure', 'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.', 50000.00, '', 'assets/img/manicure.jpg', 'assets/img/manicure.jpg', '🪷', 'mani', 'utama', 5, 1, 1, 1, 0, 1, 45),
+	(1, 'Nail Art', 'Layanan nail art dengan berbagai desain kreatif dan custom sesuai keinginanmu.', 50000.00, '', 'assets/img/nail.jpeg', 'assets/img/art.jpg', '💅🏻', 'nailart', 'utama', 1, 1, 1, 1, 1, 1, 30),
+	(2, 'Press-on Nails', 'Kuku instan dengan desain trendy dan mudah digunakan.', 25000.00, '', 'assets/img/press.jpeg', 'assets/img/on.jpg', '🎀', 'presson', 'utama', 2, 1, 1, 1, 1, 1, 30),
+	(3, 'Nail Tip', 'Penambahan dan perpanjangan kuku dengan hasil natural dan rapi.', 100000.00, '', 'assets/img/tip.jpeg', 'assets/img/tip price.jpg', '🍃', 'tip', 'utama', 3, 1, 1, 1, 1, 1, 30),
+	(4, 'Lash Lift', 'Perawatan bulu mata agar terlihat lebih lentik dan natural.', 45000.00, '', 'assets/img/lash.jpeg', 'assets/img/lift.png', '👁', 'lash', 'lainnya', 4, 1, 1, 1, 1, 1, 30),
+	(5, 'Manicure', 'Perawatan dasar untuk menjaga kesehatan dan kecantikan kuku.', 50000.00, '', 'assets/img/manicure.webp', 'assets/img/manicure.webp', '🪷', 'mani', 'utama', 5, 1, 1, 1, 0, 1, 30),
 	(6, 'Remover Nail Art', 'Layanan penghapusan nail art untuk membantu membersihkan kuku.', 3000.00, '/Jari', 'assets/img/remov.jpeg', 'assets/img/remov.jpeg', '♡', 'remover', 'lainnya', 6, 1, 1, 0, 0, 1, 30),
-	(7, 'Custom Design', 'Desain sesuai tema, warna, dan request khusus kamu.', 50000.00, '', 'assets/img/1.jpeg', 'assets/img/1.jpeg', '✏', 'custom', 'utama', 7, 0, 1, 0, 0, 1, 90);
+	(7, 'Custom Design', 'Desain sesuai tema, warna, dan request khusus kamu.', 50000.00, '', 'assets/img/1.jpeg', 'assets/img/1.jpeg', '✏', 'custom', 'utama', 7, 0, 1, 0, 0, 1, 30);
 
 -- Dumping structure for table yynnails.login_gagal
 CREATE TABLE IF NOT EXISTS `login_gagal` (
@@ -145,19 +145,20 @@ CREATE TABLE IF NOT EXISTS `pesanan` (
   `catatan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN ('Menunggu Konfirmasi','Dikonfirmasi'), CONCAT(`tanggal`,' ',`jam`), NULL)) STORED,
+  `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN ('Menunggu Konfirmasi','Dikonfirmasi','Selesai'), CONCAT(`tanggal`,' ',`jam`), NULL)) STORED,
   PRIMARY KEY (`id_pesanan`),
   UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`),
   KEY `id_pelanggan` (`id_pelanggan`),
   CONSTRAINT `pesanan_ibfk_1` FOREIGN KEY (`id_pelanggan`) REFERENCES `pelanggan` (`id_pelanggan`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Migrasi untuk database lama: cegah dua booking aktif di tanggal + jam yang sama.
+-- Migrasi untuk database lama: cegah dua booking di tanggal + jam yang sama
+-- (status Menunggu, Dikonfirmasi, dan Selesai mengunci jam; Ditolak membebaskan jam).
 -- Aman di-import berulang kali (dilewati kalau kolom sudah ada).
 SET @ada_slot := (SELECT COUNT(*) FROM information_schema.COLUMNS
                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pesanan' AND COLUMN_NAME = 'slot_aktif');
 SET @sql_slot := IF(@ada_slot = 0,
-  'ALTER TABLE `pesanan` ADD COLUMN `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN (''Menunggu Konfirmasi'',''Dikonfirmasi''), CONCAT(`tanggal`,'' '',`jam`), NULL)) STORED, ADD UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`)',
+  'ALTER TABLE `pesanan` ADD COLUMN `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN (''Menunggu Konfirmasi'',''Dikonfirmasi'',''Selesai''), CONCAT(`tanggal`,'' '',`jam`), NULL)) STORED, ADD UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`)',
   'DO 0');
 PREPARE stmt_slot FROM @sql_slot;
 EXECUTE stmt_slot;
@@ -191,6 +192,31 @@ FROM `pesanan` p
 LEFT JOIN `layanan` l ON l.nama_layanan = p.layanan
 WHERE p.status = 'Dikonfirmasi'
   AND NOT EXISTS (SELECT 1 FROM `jadwal` j WHERE j.id_pesanan = p.id_pesanan);
+
+-- Perbaikan untuk database lama (aman dijalankan berulang):
+-- foto layanan Manicure ada di assets/img/manicure.webp (bukan .jpg)
+UPDATE `layanan` SET `gambar` = 'assets/img/manicure.webp' WHERE `gambar` = 'assets/img/manicure.jpg';
+UPDATE `layanan` SET `gambar_harga` = 'assets/img/manicure.webp' WHERE `gambar_harga` = 'assets/img/manicure.jpg';
+
+-- Database lama: jam yang berstatus Selesai ikut mengunci jam (anti booking ganda).
+-- Dibuat paling akhir; dilewati kalau sudah diperbarui.
+SET @slot_lama := (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pesanan' AND COLUMN_NAME = 'slot_aktif'
+                     AND GENERATION_EXPRESSION NOT LIKE '%Selesai%');
+SET @sql_ganti := IF(@slot_lama > 0,
+  'ALTER TABLE `pesanan` DROP INDEX `uniq_slot_aktif`, DROP COLUMN `slot_aktif`',
+  'DO 0');
+PREPARE stmt_ganti FROM @sql_ganti;
+EXECUTE stmt_ganti;
+DEALLOCATE PREPARE stmt_ganti;
+SET @ada_slot2 := (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pesanan' AND COLUMN_NAME = 'slot_aktif');
+SET @sql_baru := IF(@ada_slot2 = 0,
+  'ALTER TABLE `pesanan` ADD COLUMN `slot_aktif` varchar(20) GENERATED ALWAYS AS (IF(`status` IN (''Menunggu Konfirmasi'',''Dikonfirmasi'',''Selesai''), CONCAT(`tanggal`,'' '',`jam`), NULL)) STORED, ADD UNIQUE KEY `uniq_slot_aktif` (`slot_aktif`)',
+  'DO 0');
+PREPARE stmt_baru FROM @sql_baru;
+EXECUTE stmt_baru;
+DEALLOCATE PREPARE stmt_baru;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

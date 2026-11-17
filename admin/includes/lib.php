@@ -26,6 +26,7 @@ try {
     $A['kategori'] = [];
 }
 
+require_once __DIR__ . '/../../includes/booking.php';   // aturan jam, kuota, format tanggal (sama dengan website)
 require_once __DIR__ . '/header.php';
 require_once __DIR__ . '/navbar.php';
 require_once __DIR__ . '/footer.php';
@@ -36,6 +37,10 @@ require_once __DIR__ . '/footer.php';
 function h($value): string {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
+
+// Riwayat yang boleh dibersihkan: booking berstatus ditutup & lebih tua dari 6 bulan
+const RIWAYAT_BULAN  = 6;
+const RIWAYAT_STATUS = ['Selesai', 'Ditolak', 'Kedaluwarsa', 'Tidak Hadir'];
 
 // Wajib login: kalau belum, kembali ke halaman login
 function wajib_login(): void {
